@@ -46,5 +46,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Exceptions\TooManyConstructorsException.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="SimpleFactory.nuspec" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
