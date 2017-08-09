@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFactory", "Code\SimpleFactory.csproj", "{4376E8BF-CA9C-49C8-8876-657728290960}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFactory.Test", "Test\SimpleFactory.Test\SimpleFactory.Test.csproj", "{82C4B800-5673-4CEE-9378-F1BCE61D57E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{4376E8BF-CA9C-49C8-8876-657728290960}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4376E8BF-CA9C-49C8-8876-657728290960}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4376E8BF-CA9C-49C8-8876-657728290960}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82C4B800-5673-4CEE-9378-F1BCE61D57E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82C4B800-5673-4CEE-9378-F1BCE61D57E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82C4B800-5673-4CEE-9378-F1BCE61D57E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82C4B800-5673-4CEE-9378-F1BCE61D57E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
