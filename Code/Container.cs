@@ -24,7 +24,7 @@ namespace SimpleFactory
 
         public Container()
         {
-            creatorMethodInfo = typeof(Container).GetMethod(nameof(CreateInstanceInternal), BindingFlags.NonPublic | BindingFlags.Instance);
+            creatorMethodInfo = typeof(Container).GetMethod(nameof(CreateInstance), BindingFlags.NonPublic | BindingFlags.Instance);
             containsKey = typeof(Dictionary<Type, object>).GetMethod("ContainsKey");
             containerMi = typeof(Container).GetMethod(nameof(CreateInstance), new Type[] { typeof(object[]) });
         }
@@ -44,9 +44,25 @@ namespace SimpleFactory
         }
 
 
+        public IEnumerable<RegistrationInfo> Items()
+        {
+            foreach (var item in Registered)
+            {
+                yield return item.Value;
+            }
+        }
+
         public TToCreate CreateInstance<TToCreate>()
         {
             return CreateInstance<TToCreate>(new Dictionary<Type, object>());
+        }
+        public object CreateAnonymousInstance(Type toCreate)
+        {
+            return CreateInstance(toCreate, new Dictionary<Type, object>());
+        }
+        public object CreateAnonymousInstance(Type toCreate, params object[] providedTypes)
+        {
+            return CreateInstance(toCreate, providedTypes.ToDictionary(o => o.GetType()));
         }
 
         public TToCreate CreateInstance<TToCreate>(params object[] providedTypes)
@@ -72,7 +88,7 @@ namespace SimpleFactory
             return (TToCreate)Registered[typeof(TToCreate)].Factory(providedTypes);
         }
 
-        private object CreateInstanceInternal(Type toCreate, Dictionary<Type, Object> providedTypes)
+        private object CreateInstance(Type toCreate, Dictionary<Type, Object> providedTypes)
         {
             if (!Registered.ContainsKey(toCreate))
             {
