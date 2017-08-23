@@ -167,7 +167,7 @@ namespace SimpleFactory
         {
             readonly Dictionary<Type, object> prov;
 
-            public ProvidedInstances(params object[] input)
+            public ProvidedInstances( object[] input)
             {
                 prov =  input.ToDictionary(o => o.GetType());
             }
