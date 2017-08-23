@@ -167,7 +167,12 @@ namespace SimpleFactory
         {
             readonly Dictionary<Type, object> prov;
 
-            internal ProvidedInstances(Dictionary<Type, object> prov)
+            public ProvidedInstances(params object[] input)
+            {
+                prov =  input.ToDictionary(o => o.GetType());
+            }
+
+            public ProvidedInstances(Dictionary<Type, object> prov)
             {
                 this.prov = prov;
             }
