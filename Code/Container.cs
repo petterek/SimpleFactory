@@ -165,26 +165,26 @@ namespace SimpleFactory
 
         public class ProvidedInstances
         {
-            public readonly Dictionary<Type, object> prov;
+            public readonly Dictionary<Type, object> Prov;
 
             public ProvidedInstances( object[] input)
             {
-                prov =  input.ToDictionary(o => o.GetType());
+                Prov =  input.ToDictionary(o => o.GetType());
             }
 
             public ProvidedInstances(Dictionary<Type, object> prov)
             {
-                this.prov = prov;
+                this.Prov = prov;
             }
 
             public bool HasInstanceOf<T>()
             {
-                return prov.ContainsKey(typeof(T));
+                return Prov.ContainsKey(typeof(T));
             }
 
             public T GetInstanc<T>()
             {
-                return (T)prov[typeof(T)];
+                return (T)Prov[typeof(T)];
             }
 
         }
