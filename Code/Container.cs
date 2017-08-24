@@ -165,7 +165,7 @@ namespace SimpleFactory
 
         public class ProvidedInstances
         {
-            readonly Dictionary<Type, object> prov;
+            public readonly Dictionary<Type, object> prov;
 
             public ProvidedInstances( object[] input)
             {
