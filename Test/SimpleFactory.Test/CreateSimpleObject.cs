@@ -88,6 +88,7 @@ namespace SimpleFactory.Test
 
     }
 
+
     public class ClassWithFields
     {
         public ISimpleInterface Simple;

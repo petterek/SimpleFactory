@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="CreateSimpleObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestCornerCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Code\SimpleFactory.csproj">

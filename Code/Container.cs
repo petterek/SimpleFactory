@@ -38,9 +38,9 @@ namespace SimpleFactory
             Registered[typeof(TType)] = new RegistrationInfo { Type = typeof(TType), Factory = BuildLambda(typeof(TType)) };
         }
 
-        public void Register<TType>(Func<ProvidedInstances, TType> factory)
+        public void Register<TType>(Func<Dictionary<Type, Object>, TType> factory)
         {
-            Registered[typeof(TType)] = new RegistrationInfo { Type = typeof(TType), Factory = prov => factory(new ProvidedInstances(prov)) };
+            Registered[typeof(TType)] = new RegistrationInfo { Type = typeof(TType), Factory = prov => factory(prov) };
         }
 
 
@@ -161,33 +161,7 @@ namespace SimpleFactory
             }
 
         }
-
-
-        public class ProvidedInstances
-        {
-            public readonly Dictionary<Type, object> Prov;
-
-            public ProvidedInstances( object[] input)
-            {
-                Prov =  input.ToDictionary(o => o.GetType());
-            }
-
-            public ProvidedInstances(Dictionary<Type, object> prov)
-            {
-                this.Prov = prov;
-            }
-
-            public bool HasInstanceOf<T>()
-            {
-                return Prov.ContainsKey(typeof(T));
-            }
-
-            public T GetInstanc<T>()
-            {
-                return (T)Prov[typeof(T)];
-            }
-
-        }
+                       
 
 
     }
