@@ -16,7 +16,7 @@ namespace SimpleFactory.Test
             w.Register<ISomeService, SomeService>();
             w.Register<SomeDep>(e => ret);
 
-            var res = w.Create<ISomeService>(new object[0]);
+            var res = w.Create<ISomeService>(new object[] { new object()});
 
             Assert.IsNotNull(res);
         }
@@ -82,9 +82,9 @@ namespace SimpleFactory.Test
         {
             di.Register<TInt, TInst>();
         }
-        public void Register<T>(System.Func<Dictionary<Type, object>,T> func)
+        public void Register<T>(Func<object,T> func)
         {
-            di.Register<T>(e => func(e));
+            di.Register<T,object>(e => func(e));
         }
 
         public T Create<T>(object[] provided)

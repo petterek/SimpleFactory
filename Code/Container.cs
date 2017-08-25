@@ -38,11 +38,45 @@ namespace SimpleFactory
             Registered[typeof(TType)] = new RegistrationInfo { Type = typeof(TType), Factory = BuildLambda(typeof(TType)) };
         }
 
-        public void Register<TType>(Func<Dictionary<Type, Object>, TType> factory)
+
+        public void Register<TType>(Func<TType> factory)
         {
-            Registered[typeof(TType)] = new RegistrationInfo { Type = typeof(TType), Factory = prov => factory(prov) };
+            Registered[typeof(TType)] = new RegistrationInfo
+            {
+                Type = typeof(TType),
+                Factory = p => factory()
+            };
+        }
+        public void Register<TType, TParam1>(Func<TParam1, TType> factory)
+        {
+            Registered[typeof(TType)] = new RegistrationInfo
+            {
+                Type = typeof(TType),
+                Factory = prov => factory(GetParam<TParam1>(prov))
+            };
+        }
+        public void Register<TType, TParam1,TParam2>(Func<TParam1,TParam2, TType> factory)
+        {
+            Registered[typeof(TType)] = new RegistrationInfo
+            {
+                Type = typeof(TType),
+                Factory = prov => factory(GetParam<TParam1>(prov),GetParam<TParam2>(prov))
+            };
+        }
+        public void Register<TType, TParam1, TParam2,TParam3>(Func<TParam1,TParam2,TParam3 ,TType> factory)
+        {
+            Registered[typeof(TType)] = new RegistrationInfo
+            {
+                Type = typeof(TType),
+                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov),GetParam<TParam3>(prov))
+            };
         }
 
+
+        private T GetParam<T>(Dictionary<Type, object> prov)
+        {
+            return (T)CreateInstance(typeof(T), prov);
+        }
 
         public IEnumerable<RegistrationInfo> Items()
         {
@@ -90,6 +124,10 @@ namespace SimpleFactory
 
         private object CreateInstance(Type toCreate, Dictionary<Type, Object> providedTypes)
         {
+            if (providedTypes.ContainsKey(toCreate))
+            {
+                return providedTypes[toCreate];
+            }
             if (!Registered.ContainsKey(toCreate))
             {
                 throw new MissingRegistrationException(toCreate);
@@ -105,7 +143,7 @@ namespace SimpleFactory
             {
                 throw new ArgumentOutOfRangeException($"Unable to construct type {toCreate}, no constructor found!");
             }
-                if (constructor.Length > 1)
+            if (constructor.Length > 1)
             {
                 throw new TooManyConstructorsException();
             }
@@ -131,9 +169,9 @@ namespace SimpleFactory
                     ), item.ParameterType));
             }
 
-            
+
             var ctor = Expression.New(constructorInfo, paramList);
-            
+
 
             return Expression.Lambda<Func<Dictionary<Type, Object>, object>>(ctor, refProvide).Compile();
         }
@@ -161,8 +199,6 @@ namespace SimpleFactory
             }
 
         }
-                       
-
-
+        
     }
 }

@@ -69,7 +69,7 @@ namespace SimpleFactory.Test
         public void RegisterWithFactory()
         {
             var container = new Container();
-            container.Register<ISimpleInterface>((prov) => new SimpleOne());
+            container.Register<ISimpleInterface>(()=> new SimpleOne());
             var test = container.CreateInstance<ISimpleInterface>();
             Assert.IsInstanceOf<SimpleOne>(test);
 
