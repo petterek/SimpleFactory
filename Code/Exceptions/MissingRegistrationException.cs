@@ -34,5 +34,6 @@ namespace SimpleFactory.Exceptions
         protected MissingRegistrationException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
+
     }
 }
