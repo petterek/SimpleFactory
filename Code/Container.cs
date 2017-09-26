@@ -149,19 +149,8 @@ namespace SimpleFactory
                 throw new MissingRegistrationException(typeof(TToCreate));
             }
 
-            var key = $"{typeof(TToCreate).FullName}-{string.Join("-", providedTypes.Select(e => e.Key.FullName).ToArray())}"; //Just the list of all involved types.. To ensure unique function for each
-            if (!creatorFunctions.ContainsKey(key))
-            {
-                lock (creatorFunctions)
-                {
-                    if (!creatorFunctions.ContainsKey(key))
-                    {
-                        creatorFunctions[key] = BuildLambda(typeof(TToCreate), new List<Type>());
-                    }
-                }
-            }
-
-            return (TToCreate)creatorFunctions[key](providedTypes);
+            return (TToCreate)CreateInstance(typeof(TToCreate), providedTypes);
+                        
         }
 
         private Func<Dictionary<Type, object>, object> BuildLambda(Type type, List<Type> list)
@@ -207,15 +196,21 @@ namespace SimpleFactory
 
         private object CreateInstance(Type toCreate, Dictionary<Type, Object> providedTypes)
         {
-            if (providedTypes.ContainsKey(toCreate))
+            if (providedTypes.ContainsKey(toCreate)) return providedTypes[toCreate];
+
+            var key = $"{toCreate.FullName}-{string.Join("-", providedTypes.Select(e => e.Key.FullName).ToArray())}"; //Just the list of all involved types.. To ensure unique function for each
+            if (!creatorFunctions.ContainsKey(key))
             {
-                return providedTypes[toCreate];
+                lock (creatorFunctions)
+                {
+                    if (!creatorFunctions.ContainsKey(key))
+                    {
+                        creatorFunctions[key] = BuildLambda(toCreate, new List<Type>());
+                    }
+                }
             }
-            if (!Registered.ContainsKey(toCreate))
-            {
-                throw new MissingRegistrationException(toCreate);
-            }
-            return Registered[toCreate].Factory(providedTypes);
+
+            return creatorFunctions[key](providedTypes);
         }
 
         //Func<Dictionary<Type, Object>, object> BuildLambda(Type toCreate)
