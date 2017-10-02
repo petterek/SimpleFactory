@@ -9,10 +9,13 @@ namespace SimpleFactory
 {
     public class RegistrationInfo
     {
-        public Type Type;
+        internal Type Type;
         public Func<Dictionary<Type, Object>, object> Factory;
-        public ConstructorInfo Constructor;
-        public ParameterInfo[] ConstructorParams;
+        internal ConstructorInfo Constructor;
+        internal ParameterInfo[] ConstructorParams;
+        public void AsSingleton() { Singleton = true; }
+        internal bool Singleton;
+        internal object Instance ;
     }
 
 
@@ -197,7 +200,7 @@ namespace SimpleFactory
         private object CreateInstance(Type toCreate, Dictionary<Type, Object> providedTypes)
         {
             if (providedTypes.ContainsKey(toCreate)) return providedTypes[toCreate];
-
+            
             var key = $"{toCreate.FullName}-{string.Join("-", providedTypes.Select(e => e.Key.FullName).ToArray())}"; //Just the list of all involved types.. To ensure unique function for each
             if (!creatorFunctions.ContainsKey(key))
             {
@@ -209,41 +212,21 @@ namespace SimpleFactory
                     }
                 }
             }
+            
+            RegistrationInfo registrationInfo = Registered[toCreate];
 
-            return creatorFunctions[key](providedTypes);
+            if (registrationInfo.Singleton && registrationInfo.Instance != null )
+            {
+                return registrationInfo.Instance;
+            }
+
+            var ret = creatorFunctions[key](providedTypes);
+            if (registrationInfo.Singleton) registrationInfo.Instance = ret;
+
+            return ret;
         }
 
-        //Func<Dictionary<Type, Object>, object> BuildLambda(Type toCreate)
-        //{
-
-
-        //    ConstructorInfo constructorInfo = constructor[0];
-
-        //    var paramList = new List<Expression>();
-        //    var refProvide = Expression.Parameter(typeof(Dictionary<Type, object>));
-
-        //    foreach (var item in constructorInfo.GetParameters())
-        //    {
-        //        var typeParameter = Expression.Constant(item.ParameterType);
-
-        //        var ifTest = Expression.Call(refProvide, containsKey, typeParameter);
-
-        //        var getValueFromDic = Expression.Property(refProvide, "Item", typeParameter);
-
-        //        var getValueFromFunc = Expression.Call(Expression.Constant(this), creatorMethodInfo, typeParameter, refProvide);
-
-        //        paramList.Add(
-        //            Expression.Convert(
-        //                Expression.Condition(ifTest, getValueFromDic, getValueFromFunc
-        //            ), item.ParameterType));
-        //    }
-
-
-        //    var ctor = Expression.New(constructorInfo, paramList);
-
-
-        //    return Expression.Lambda<Func<Dictionary<Type, Object>, object>>(ctor, refProvide).Compile();
-        //}
+    
 
         private MethodInfo GetGenericMethod(Type t)
         {

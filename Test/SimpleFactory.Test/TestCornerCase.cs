@@ -21,9 +21,28 @@ namespace SimpleFactory.Test
             Assert.IsNotNull(res);
         }
 
+        [Test] public void RegisterSingletonIsWorking()
+        {
+            var c = new Container();
+            c.Register<Adder>().AsSingleton();
+            c.CreateInstance<Adder>().Add();
+            c.CreateInstance<Adder>().Add();
+
+            Assert.AreEqual(2, c.CreateInstance<Adder>().Sum);
+
+        }
+
     }
 
 
+    public class Adder
+    {
+        public void Add()
+        {
+            Sum += 1;
+        }
+        public int Sum;
+    }
 
 
     public class Result
