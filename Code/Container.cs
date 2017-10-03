@@ -81,29 +81,35 @@ namespace SimpleFactory
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
-        public void Register<TType, TParam1>(Func<TParam1, TType> factory)
+        public RegistrationInfo Register<TType, TParam1>(Func<TParam1, TType> factory)
         {
-            Registered[typeof(TType)] = new RegistrationInfo
+            RegistrationInfo registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
                 Factory = prov => factory(GetParam<TParam1>(prov))
             };
+            Registered[typeof(TType)] = registrationInfo;
+            return registrationInfo;
         }
-        public void Register<TType, TParam1, TParam2>(Func<TParam1, TParam2, TType> factory)
+        public RegistrationInfo Register<TType, TParam1, TParam2>(Func<TParam1, TParam2, TType> factory)
         {
-            Registered[typeof(TType)] = new RegistrationInfo
+            RegistrationInfo registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
                 Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov))
             };
+            Registered[typeof(TType)] = registrationInfo;
+            return registrationInfo;
         }
-        public void Register<TType, TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, TType> factory)
+        public RegistrationInfo Register<TType, TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, TType> factory)
         {
-            Registered[typeof(TType)] = new RegistrationInfo
+            RegistrationInfo registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
                 Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov), GetParam<TParam3>(prov))
             };
+            Registered[typeof(TType)] = registrationInfo;
+            return registrationInfo;
         }
         private T GetParam<T>(Dictionary<Type, object> prov)
         {
