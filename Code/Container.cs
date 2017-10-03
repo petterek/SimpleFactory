@@ -15,7 +15,7 @@ namespace SimpleFactory
         internal ParameterInfo[] ConstructorParams;
         public void AsSingleton() { Singleton = true; }
         internal bool Singleton;
-        internal object Instance ;
+        internal object Instance;
     }
 
 
@@ -39,7 +39,7 @@ namespace SimpleFactory
             containerMi = typeof(Container).GetMethod(nameof(CreateInstance), new Type[] { typeof(object[]) });
             RegistrationFactory = typeof(RegistrationInfo).GetField("Factory");
         }
-                
+
 
         public RegistrationInfo Register<TType>()
         {
@@ -70,15 +70,16 @@ namespace SimpleFactory
             return registrationInfo;
         }
 
-
-
-        public void Register<TType>(Func<TType> factory)
+        public RegistrationInfo Register<TType>(Func<TType> factory)
         {
-            Registered[typeof(TType)] = new RegistrationInfo
+            var registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
                 Factory = p => factory()
             };
+
+            Registered[typeof(TType)] = registrationInfo;
+            return registrationInfo;
         }
         public void Register<TType, TParam1>(Func<TParam1, TType> factory)
         {
@@ -153,7 +154,7 @@ namespace SimpleFactory
             }
 
             return (TToCreate)CreateInstance(typeof(TToCreate), providedTypes);
-                        
+
         }
 
         private Func<Dictionary<Type, object>, object> BuildLambda(Type type, List<Type> list)
@@ -200,7 +201,7 @@ namespace SimpleFactory
         private object CreateInstance(Type toCreate, Dictionary<Type, Object> providedTypes)
         {
             if (providedTypes.ContainsKey(toCreate)) return providedTypes[toCreate];
-            
+
             var key = $"{toCreate.FullName}-{string.Join("-", providedTypes.Select(e => e.Key.FullName).ToArray())}"; //Just the list of all involved types.. To ensure unique function for each
             if (!creatorFunctions.ContainsKey(key))
             {
@@ -212,10 +213,10 @@ namespace SimpleFactory
                     }
                 }
             }
-            
+
             RegistrationInfo registrationInfo = Registered[toCreate];
 
-            if (registrationInfo.Singleton && registrationInfo.Instance != null )
+            if (registrationInfo.Singleton && registrationInfo.Instance != null)
             {
                 return registrationInfo.Instance;
             }
@@ -226,7 +227,7 @@ namespace SimpleFactory
             return ret;
         }
 
-    
+
 
         private MethodInfo GetGenericMethod(Type t)
         {
