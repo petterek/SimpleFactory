@@ -47,6 +47,7 @@
     <Compile Include="CreateSimpleObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegestringSubElements.cs" />
+    <Compile Include="SingletonCases.cs" />
     <Compile Include="TestCornerCase.cs" />
   </ItemGroup>
   <ItemGroup>

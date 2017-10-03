@@ -31,7 +31,6 @@ namespace SimpleFactory.Test
             Assert.AreEqual(2, c.CreateInstance<Adder>().Sum);
 
         }
-
     }
 
 
