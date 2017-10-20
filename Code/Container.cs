@@ -177,9 +177,13 @@ namespace SimpleFactory
 
         private Expression CreateBuilders(Type type, Stack<Type> list, ParameterExpression providedTypes)
         {
-            if (list.Contains(type)) throw new Exceptions.CircularDependencyDetected();
+            if (list.Contains(type)) throw new CircularDependencyDetected();
             list.Push(type);
 
+            if (!Registered.ContainsKey(type))
+            {
+                throw new MissingRegistrationException(type);
+            }
             RegistrationInfo registrationInfo = Registered[type];
 
             if (registrationInfo.Factory != null)
