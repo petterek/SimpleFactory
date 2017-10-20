@@ -163,7 +163,7 @@ namespace SimpleFactory
 
         }
 
-        private Func<Dictionary<Type, object>, object> BuildLambda(Type type, List<Type> list)
+        private Func<Dictionary<Type, object>, object> BuildLambda(Type type, Stack<Type> list)
         {
 
             var providedTypes = Expression.Parameter(typeof(Dictionary<Type, object>));
@@ -175,10 +175,10 @@ namespace SimpleFactory
         }
 
 
-        private Expression CreateBuilders(Type type, List<Type> list, ParameterExpression providedTypes)
+        private Expression CreateBuilders(Type type, Stack<Type> list, ParameterExpression providedTypes)
         {
             if (list.Contains(type)) throw new Exceptions.CircularDependencyDetected();
-            list.Add(type);
+            list.Push(type);
 
             RegistrationInfo registrationInfo = Registered[type];
 
@@ -187,6 +187,7 @@ namespace SimpleFactory
                 ConstantExpression target = Expression.Constant(Registered[type]);
                 MemberExpression memberExpression = Expression.MakeMemberAccess(target, RegistrationFactory);
 
+                list.Pop();
                 return Expression.Convert(Expression.Invoke(memberExpression, providedTypes), type);
             }
 
@@ -197,7 +198,7 @@ namespace SimpleFactory
                 Expression.Assign(local, Expression.Convert(Expression.Property(providedTypes, "Item", Expression.Constant(type)), type)),
                 Expression.Assign(local, Expression.New(registrationInfo.Constructor, registrationInfo.ConstructorParams.Select(p => CreateBuilders(p.ParameterType, list, providedTypes))))
                 );
-
+            list.Pop();
             return Expression.Block(new ParameterExpression[] { local }, new Expression[] { ifEx, local });
 
         }
@@ -215,7 +216,7 @@ namespace SimpleFactory
                 {
                     if (!creatorFunctions.ContainsKey(key))
                     {
-                        creatorFunctions[key] = BuildLambda(toCreate, new List<Type>());
+                        creatorFunctions[key] = BuildLambda(toCreate, new Stack<Type>());
                     }
                 }
             }

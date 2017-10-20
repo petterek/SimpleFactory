@@ -5,10 +5,12 @@ using System.Linq;
 
 namespace SimpleFactory.Test
 {
-    [TestFixture]public class TestCornerCase
+    [TestFixture]
+    public class TestCornerCase
     {
 
-        [Test] public void CorneCase1 ()
+        [Test]
+        public void CorneCase1()
         {
             var w = new Wrapper();
             var ret = new SomeDep();
@@ -16,12 +18,13 @@ namespace SimpleFactory.Test
             w.Register<ISomeService, SomeService>();
             w.Register<SomeDep>(e => ret);
 
-            var res = w.Create<ISomeService>(new object[] { new object()});
+            var res = w.Create<ISomeService>(new object[] { new object() });
 
             Assert.IsNotNull(res);
         }
 
-        [Test] public void RegisterSingletonIsWorking()
+        [Test]
+        public void RegisterSingletonIsWorking()
         {
             var c = new Container();
             c.Register<Adder>().AsSingleton();
@@ -30,6 +33,41 @@ namespace SimpleFactory.Test
 
             Assert.AreEqual(2, c.CreateInstance<Adder>().Sum);
 
+        }
+
+        [Test]
+        public void TestDependencyToSameType()
+        {
+            var c = new Container();
+            c.Register<A1>();
+            c.Register<A2>();
+            c.Register<RepoMock>();
+            c.CreateInstance<A1>();
+        }
+    }
+
+    public class RepoMock
+    {
+    }
+
+    public class A1
+    {
+        readonly RepoMock r;
+        readonly A2 a2;
+
+        public A1(RepoMock r, A2 a2)
+        {
+            this.a2 = a2;
+            this.r = r;
+        }
+    }
+
+    public class A2
+    {
+        readonly RepoMock r;
+        public A2(RepoMock r)
+        {
+            this.r = r;
         }
     }
 
@@ -96,13 +134,13 @@ namespace SimpleFactory.Test
             this.di = new Container();
         }
 
-        public void Register<TInt, TInst>() where TInst:TInt
+        public void Register<TInt, TInst>() where TInst : TInt
         {
             di.Register<TInt, TInst>();
         }
-        public void Register<T>(Func<object,T> func)
+        public void Register<T>(Func<object, T> func)
         {
-            di.Register<T,object>(e => func(e));
+            di.Register<T, object>(e => func(e));
         }
 
         public T Create<T>(object[] provided)
