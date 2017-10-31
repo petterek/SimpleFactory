@@ -111,6 +111,46 @@ namespace SimpleFactory
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
+        public RegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4>(Func<TParam1, TParam2, TParam3, TParam4, TType> factory)
+        {
+            RegistrationInfo registrationInfo = new RegistrationInfo
+            {
+                Type = typeof(TType),
+                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov), GetParam<TParam3>(prov), GetParam<TParam4>(prov))
+            };
+            Registered[typeof(TType)] = registrationInfo;
+            return registrationInfo;
+        }
+        public RegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TType> factory)
+        {
+            RegistrationInfo registrationInfo = new RegistrationInfo
+            {
+                Type = typeof(TType),
+                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov), GetParam<TParam3>(prov), GetParam<TParam4>(prov), GetParam<TParam5>(prov))
+            };
+            Registered[typeof(TType)] = registrationInfo;
+            return registrationInfo;
+        }
+        public RegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TType> factory)
+        {
+            RegistrationInfo registrationInfo = new RegistrationInfo
+            {
+                Type = typeof(TType),
+                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov), GetParam<TParam3>(prov), GetParam<TParam4>(prov), GetParam<TParam5>(prov), GetParam<TParam6>(prov))
+            };
+            Registered[typeof(TType)] = registrationInfo;
+            return registrationInfo;
+        }
+        public RegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TType> factory)
+        {
+            RegistrationInfo registrationInfo = new RegistrationInfo
+            {
+                Type = typeof(TType),
+                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov), GetParam<TParam3>(prov), GetParam<TParam4>(prov), GetParam<TParam5>(prov), GetParam<TParam6>(prov), GetParam<TParam7>(prov))
+            };
+            Registered[typeof(TType)] = registrationInfo;
+            return registrationInfo;
+        }
         private T GetParam<T>(Dictionary<Type, object> prov)
         {
             return (T)CreateInstance(typeof(T), prov);
