@@ -163,43 +163,50 @@ namespace SimpleFactory
 
         }
 
-        private Func<Dictionary<Type, object>, object> BuildLambda(Type type, Stack<Type> list)
+        private Func<Dictionary<Type, object>, object> BuildLambda(Type type, Stack<Type> list, Dictionary<Type, Object> providedTypes)
         {
 
-            var providedTypes = Expression.Parameter(typeof(Dictionary<Type, object>));
+            var providedTypesParam = Expression.Parameter(typeof(Dictionary<Type, object>));
 
-            Expression body = CreateBuilders(type, list, providedTypes);
+            Expression body = CreateBuilders(type, list, providedTypesParam,providedTypes);
 
-            return Expression.Lambda<Func<Dictionary<Type, object>, object>>(body, providedTypes).Compile();
+            return Expression.Lambda<Func<Dictionary<Type, object>, object>>(body, providedTypesParam).Compile();
 
         }
 
 
-        private Expression CreateBuilders(Type type, Stack<Type> list, ParameterExpression providedTypes)
+        private Expression CreateBuilders(Type type, Stack<Type> list, ParameterExpression providedTypesParam, Dictionary<Type, Object> providedTypes)
         {
             if (list.Contains(type)) throw new Exceptions.CircularDependencyDetected();
             list.Push(type);
 
-            RegistrationInfo registrationInfo = Registered[type];
 
-            if (registrationInfo.Factory != null)
+            Expression returnEx;
+            if(providedTypes.ContainsKey(type))
             {
-                ConstantExpression target = Expression.Constant(Registered[type]);
-                MemberExpression memberExpression = Expression.MakeMemberAccess(target, RegistrationFactory);
-
-                list.Pop();
-                return Expression.Convert(Expression.Invoke(memberExpression, providedTypes), type);
+                //Is provided
+                returnEx = Expression.Convert(Expression.Property(providedTypesParam, "Item", Expression.Constant(type)), type);
             }
+            else {
+                RegistrationInfo registrationInfo = Registered[type];
 
-            var local = Expression.Variable(type, "result");
+                if (registrationInfo.Factory != null) //The type is registered with factory not type.. 
+                {
+                    //Has factory
+                    ConstantExpression target = Expression.Constant(Registered[type]);
+                    MemberExpression memberExpression = Expression.MakeMemberAccess(target, RegistrationFactory);
 
-            var ifEx = Expression.IfThenElse(
-                Expression.Call(providedTypes, containsKey, Expression.Constant(type)),
-                Expression.Assign(local, Expression.Convert(Expression.Property(providedTypes, "Item", Expression.Constant(type)), type)),
-                Expression.Assign(local, Expression.New(registrationInfo.Constructor, registrationInfo.ConstructorParams.Select(p => CreateBuilders(p.ParameterType, list, providedTypes))))
-                );
+                    returnEx = Expression.Convert(Expression.Invoke(memberExpression, providedTypesParam), type);
+                } else
+                {
+                    //Create factory
+                    returnEx = Expression.New(registrationInfo.Constructor, registrationInfo.ConstructorParams.Select(p => CreateBuilders(p.ParameterType, list, providedTypesParam, providedTypes)));
+                }
+            }
+            
             list.Pop();
-            return Expression.Block(new ParameterExpression[] { local }, new Expression[] { ifEx, local });
+            
+            return returnEx;
 
         }
 
@@ -216,7 +223,7 @@ namespace SimpleFactory
                 {
                     if (!creatorFunctions.ContainsKey(key))
                     {
-                        creatorFunctions[key] = BuildLambda(toCreate, new Stack<Type>());
+                        creatorFunctions[key] = BuildLambda(toCreate, new Stack<Type>(),providedTypes);
                     }
                 }
             }

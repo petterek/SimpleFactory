@@ -42,7 +42,17 @@ namespace SimpleFactory.Test
             c.Register<A1>();
             c.Register<A2>();
             c.Register<RepoMock>();
+
             c.CreateInstance<A1>();
+        }
+
+        [Test] public void InjectionOnSubTypesIsworking()
+        {
+            var c = new Container();
+            c.Register<A1>();
+            c.Register<A2>();
+            
+            c.CreateInstance<A2>(new RepoMock());
         }
     }
 
@@ -149,6 +159,7 @@ namespace SimpleFactory.Test
         }
 
     }
+
 
 
 
