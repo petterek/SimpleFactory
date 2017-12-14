@@ -85,13 +85,13 @@ namespace SimpleFactory.Test
 
             c.Register<Dep1>().PerGraph();
             c.Register<Dep2>().PerGraph();
-            c.Register<Dep3>();
+            c.Register<Dep3>().PerGraph();
             c.Register<Dep4>();
             c.Register<Dep5>();
 
             var d5 = c.CreateInstance<Dep5>();
 
-            Assert.AreNotEqual(d5.dep3.dep2, d5.dep4.dep2);
+            Assert.AreEqual(d5.dep3.dep2, d5.dep4.dep2);
             Assert.AreEqual(d5.dep3.dep2.dep1, d5.dep4.dep2.dep1);
 
         }
