@@ -46,15 +46,110 @@ namespace SimpleFactory.Test
             c.CreateInstance<A1>();
         }
 
-        [Test] public void InjectionOnSubTypesIsworking()
+        [Test]
+        public void InjectionOnSubTypesIsworking()
         {
             var c = new Container();
             c.Register<A1>();
             c.Register<A2>();
-            
+
             c.CreateInstance<A2>(new RepoMock());
         }
+
+
+
+        [Test]
+        public void LifcycleWorksAsExpetced()
+        {
+            var c = new SimpleFactory.Container();
+            
+
+            c.Register<Dep1>().PerGraph();
+            c.Register<Dep2>();
+            c.Register<Dep3>();
+            c.Register<Dep4>();
+            c.Register<Dep5>();
+
+            var d5 = c.CreateInstance<Dep5>();
+           
+            Assert.AreNotEqual(d5.dep3.dep2, d5.dep4.dep2);
+            Assert.AreEqual(d5.dep3.dep2.dep1,d5.dep4.dep2.dep1);
+
+        }
+
+        [Test]
+        public void LifcycleWorksAsExpetcedOnManyLevels()
+        {
+            var c = new SimpleFactory.Container();
+
+
+            c.Register<Dep1>().PerGraph();
+            c.Register<Dep2>().PerGraph();
+            c.Register<Dep3>();
+            c.Register<Dep4>();
+            c.Register<Dep5>();
+
+            var d5 = c.CreateInstance<Dep5>();
+
+            Assert.AreNotEqual(d5.dep3.dep2, d5.dep4.dep2);
+            Assert.AreEqual(d5.dep3.dep2.dep1, d5.dep4.dep2.dep1);
+
+        }
+
+
     }
+
+
+    public class Dep1
+    {
+
+    }
+
+    public class Dep2
+    {
+        public readonly Dep1 dep1;
+
+        public Dep2(Dep1 dep1)
+        {
+            this.dep1 = dep1;
+        }
+
+    }
+
+    public class Dep3
+    {
+        public readonly Dep2 dep2;
+        
+
+        public Dep3( Dep2 dep2)
+        {
+            this.dep2 = dep2;
+        }
+    }
+
+    public class Dep4
+    {
+        public readonly Dep2 dep2;
+
+
+        public Dep4(Dep2 dep2)
+        {
+            this.dep2 = dep2;
+        }
+    }
+
+    public class Dep5
+    {
+        public readonly Dep4 dep4;
+        public readonly Dep3 dep3;
+
+        public Dep5(Dep3 dep3,Dep4 dep4)
+        {
+            this.dep3 = dep3;
+            this.dep4 = dep4;
+        }
+    }
+
 
     public class RepoMock
     {

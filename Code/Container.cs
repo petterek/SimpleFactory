@@ -13,9 +13,13 @@ namespace SimpleFactory
         public Func<Dictionary<Type, Object>, object> Factory;
         internal ConstructorInfo Constructor;
         internal ParameterInfo[] ConstructorParams;
-        public void AsSingleton() { Singleton = true; }
-        internal bool Singleton;
+        public void AsSingleton() { LifeCycle = LifeTimeEnum.Singleton; }
+        public void PerGraph() { LifeCycle = LifeTimeEnum.PerGraph; }
+
+
         internal object Instance;
+
+        internal LifeTimeEnum LifeCycle { get; private set; }
     }
 
 
@@ -207,15 +211,26 @@ namespace SimpleFactory
         {
 
             var providedTypesParam = Expression.Parameter(typeof(Dictionary<Type, object>));
+            var parameters = new Dictionary<Type,ParameterExpression>();
+            var assign = new List<Expression>();
+            Expression body = CreateBuilders(type,parameters,assign, list, providedTypesParam, providedTypes);
 
-            Expression body = CreateBuilders(type, list, providedTypesParam,providedTypes);
+            var paramEx = new List<ParameterExpression>();
+            foreach(var v in parameters.Values)
+            {
+                paramEx.Add(v);
+            }
+            
+            assign.Add(body);
 
-            return Expression.Lambda<Func<Dictionary<Type, object>, object>>(body, providedTypesParam).Compile();
+            BlockExpression body1 = Expression.Block(paramEx,assign);
+
+            return Expression.Lambda<Func<Dictionary<Type, object>, object>>(body1, providedTypesParam).Compile();
 
         }
 
 
-        private Expression CreateBuilders(Type type, Stack<Type> list, ParameterExpression providedTypesParam, Dictionary<Type, Object> providedTypes)
+        private Expression CreateBuilders(Type type,Dictionary<Type,ParameterExpression> parameters,List<Expression> assign,  Stack<Type> list, ParameterExpression providedTypesParam, Dictionary<Type, Object> providedTypes)
         {
 
             if (list.Contains(type)) throw new CircularDependencyDetected();
@@ -223,12 +238,13 @@ namespace SimpleFactory
 
 
             Expression returnEx;
-            if(providedTypes.ContainsKey(type))
+            if (providedTypes.ContainsKey(type))
             {
                 //Is provided
                 returnEx = Expression.Convert(Expression.Property(providedTypesParam, "Item", Expression.Constant(type)), type);
             }
-            else {
+            else
+            {
 
                 if (!Registered.ContainsKey(type)) throw new MissingRegistrationException(type);
 
@@ -239,17 +255,55 @@ namespace SimpleFactory
                     //Has factory
                     ConstantExpression target = Expression.Constant(Registered[type]);
                     MemberExpression memberExpression = Expression.MakeMemberAccess(target, RegistrationFactory);
-
-                    returnEx = Expression.Convert(Expression.Invoke(memberExpression, providedTypesParam), type);
-                } else
+                    if(registrationInfo.LifeCycle == LifeTimeEnum.PerGraph)
+                    {
+                        ParameterExpression theVar; 
+                        if (!parameters.ContainsKey(type))
+                        {
+                            theVar = Expression.Variable(type);
+                            parameters[type] = theVar;
+                            assign.Add(Expression.Assign(theVar, Expression.Convert(Expression.Invoke(memberExpression, providedTypesParam), type)));
+                        } else
+                        {
+                            theVar = parameters[type];
+                        }
+                        
+                        returnEx = theVar;
+                    }
+                    else
+                    {
+                        returnEx = Expression.Convert(Expression.Invoke(memberExpression, providedTypesParam), type);
+                    }
+                    
+                }
+                else
                 {
-                    //Create factory
-                    returnEx = Expression.New(registrationInfo.Constructor, registrationInfo.ConstructorParams.Select(p => CreateBuilders(p.ParameterType, list, providedTypesParam, providedTypes)));
+                    if (registrationInfo.LifeCycle == LifeTimeEnum.PerGraph)
+                    {
+                        ParameterExpression theVar; 
+                        if (!parameters.ContainsKey(type))
+                        {
+                            theVar =  Expression.Variable(type);
+                            parameters[type] = theVar;
+                            assign.Add(Expression.Assign(theVar,Expression.New(registrationInfo.Constructor, registrationInfo.ConstructorParams.Select(p => CreateBuilders(p.ParameterType, parameters,assign, list, providedTypesParam, providedTypes)))));
+                        }else
+                        {
+                            theVar = parameters[type];
+                        }
+                        returnEx = theVar;
+                    }
+                    else
+                    {
+                        //Create factory
+                        returnEx = Expression.New(registrationInfo.Constructor, registrationInfo.ConstructorParams.Select(p => CreateBuilders(p.ParameterType, parameters,assign, list, providedTypesParam, providedTypes)));
+                    }
+                        
+                        
                 }
             }
-            
+
             list.Pop();
-            
+
             return returnEx;
 
         }
@@ -267,20 +321,20 @@ namespace SimpleFactory
                 {
                     if (!creatorFunctions.ContainsKey(key))
                     {
-                        creatorFunctions[key] = BuildLambda(toCreate, new Stack<Type>(),providedTypes);
+                        creatorFunctions[key] = BuildLambda(toCreate, new Stack<Type>(), providedTypes);
                     }
                 }
             }
 
             RegistrationInfo registrationInfo = Registered[toCreate];
 
-            if (registrationInfo.Singleton && registrationInfo.Instance != null)
+            if (registrationInfo.LifeCycle == LifeTimeEnum.Singleton && registrationInfo.Instance != null)
             {
                 return registrationInfo.Instance;
             }
 
             var ret = creatorFunctions[key](providedTypes);
-            if (registrationInfo.Singleton) registrationInfo.Instance = ret;
+            if (registrationInfo.LifeCycle == LifeTimeEnum.Singleton) registrationInfo.Instance = ret;
 
             return ret;
         }

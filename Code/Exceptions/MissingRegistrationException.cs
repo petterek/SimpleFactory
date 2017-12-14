@@ -5,12 +5,12 @@ namespace SimpleFactory.Exceptions
 {
     [Serializable]
 
-    internal class UnableToConstructExcpetion : Exception
+    public class UnableToConstructExcpetion : Exception
     {
         
     }
 
-    internal class MissingRegistrationException : Exception
+    public class MissingRegistrationException : Exception
     {
         private Type _type;
 

@@ -19,15 +19,6 @@ namespace SimpleFactory.Test
 
             Assert.Throws<SimpleFactory.Exceptions.CircularDependencyDetected>(()=> container.CreateInstance<Icor>());
             
-            //Assert.IsAssignableFrom<Level2>(((Level1)res).next);
-
-        }
-
-        [Test]
-        public void UseSubContainerToRegisterDependency()
-        {
-           //Abandoned            
-           //Use more specific interfaces instead.. 
         }
         
 
