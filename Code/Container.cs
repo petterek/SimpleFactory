@@ -10,7 +10,10 @@ namespace SimpleFactory
     public class RegistrationInfo
     {
         internal Type Type;
-        public Func<Dictionary<Type, Object>, object> Factory;
+        //public Func<Dictionary<Type, Object>, object> Factory;
+        public bool Factory = false;
+        internal MethodInfo FactoryInfo;
+        internal Object FactoryTarget;
         internal ConstructorInfo Constructor;
         internal ParameterInfo[] ConstructorParams;
         public void AsSingleton() { LifeCycle = LifeTimeEnum.Singleton; }
@@ -79,7 +82,9 @@ namespace SimpleFactory
             var registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
-                Factory = p => factory()
+                Factory = true,
+                FactoryInfo = factory.GetMethodInfo(),
+                FactoryTarget = factory.Target
             };
 
             Registered[typeof(TType)] = registrationInfo;
@@ -90,8 +95,11 @@ namespace SimpleFactory
             RegistrationInfo registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
-                Factory = prov => factory(GetParam<TParam1>(prov))
+                FactoryInfo = factory.GetMethodInfo(),
+                FactoryTarget = factory.Target,
+                Factory = true
             };
+
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
@@ -100,7 +108,9 @@ namespace SimpleFactory
             RegistrationInfo registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
-                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov))
+                FactoryInfo = factory.GetMethodInfo(),
+                FactoryTarget = factory.Target,
+                Factory = true
             };
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -110,7 +120,9 @@ namespace SimpleFactory
             RegistrationInfo registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
-                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov), GetParam<TParam3>(prov))
+                FactoryInfo = factory.GetMethodInfo(),
+                FactoryTarget = factory.Target,
+                Factory = true
             };
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -120,7 +132,9 @@ namespace SimpleFactory
             RegistrationInfo registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
-                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov), GetParam<TParam3>(prov), GetParam<TParam4>(prov))
+                FactoryInfo = factory.GetMethodInfo(),
+                FactoryTarget = factory.Target,
+                Factory = true
             };
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -130,7 +144,9 @@ namespace SimpleFactory
             RegistrationInfo registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
-                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov), GetParam<TParam3>(prov), GetParam<TParam4>(prov), GetParam<TParam5>(prov))
+                FactoryInfo = factory.GetMethodInfo(),
+                FactoryTarget = factory.Target,
+                Factory = true
             };
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -140,7 +156,9 @@ namespace SimpleFactory
             RegistrationInfo registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
-                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov), GetParam<TParam3>(prov), GetParam<TParam4>(prov), GetParam<TParam5>(prov), GetParam<TParam6>(prov))
+                FactoryInfo = factory.GetMethodInfo(),
+                FactoryTarget = factory.Target,
+                Factory = true
             };
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -150,14 +168,12 @@ namespace SimpleFactory
             RegistrationInfo registrationInfo = new RegistrationInfo
             {
                 Type = typeof(TType),
-                Factory = prov => factory(GetParam<TParam1>(prov), GetParam<TParam2>(prov), GetParam<TParam3>(prov), GetParam<TParam4>(prov), GetParam<TParam5>(prov), GetParam<TParam6>(prov), GetParam<TParam7>(prov))
+                FactoryInfo = factory.GetMethodInfo(),
+                FactoryTarget = factory.Target,
+                Factory = true
             };
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
-        }
-        private T GetParam<T>(Dictionary<Type, object> prov)
-        {
-            return (T)CreateInstance(typeof(T), prov);
         }
 
 
@@ -211,33 +227,33 @@ namespace SimpleFactory
         {
 
             var providedTypesParam = Expression.Parameter(typeof(Dictionary<Type, object>));
-            var parameters = new Dictionary<Type,ParameterExpression>();
+            var parameters = new Dictionary<Type, ParameterExpression>();
             var assign = new List<Expression>();
-            Expression body = CreateBuilders(type,parameters,assign, list, providedTypesParam, providedTypes);
+            Expression body = CreateBuilders(type, parameters, assign, list, providedTypesParam, providedTypes);
 
             var paramEx = new List<ParameterExpression>();
-            foreach(var v in parameters.Values)
+            foreach (var v in parameters.Values)
             {
                 paramEx.Add(v);
             }
-            
+
             assign.Add(body);
 
-            BlockExpression body1 = Expression.Block(paramEx,assign);
+            BlockExpression body1 = Expression.Block(paramEx, assign);
 
             return Expression.Lambda<Func<Dictionary<Type, object>, object>>(body1, providedTypesParam).Compile();
 
         }
 
 
-        private Expression CreateBuilders(Type type,Dictionary<Type,ParameterExpression> parameters,List<Expression> assign,  Stack<Type> list, ParameterExpression providedTypesParam, Dictionary<Type, Object> providedTypes)
+        private Expression CreateBuilders(Type type, Dictionary<Type, ParameterExpression> parameters, List<Expression> assign, Stack<Type> list, ParameterExpression providedTypesParam, Dictionary<Type, Object> providedTypes)
         {
 
             if (list.Contains(type)) throw new CircularDependencyDetected();
             list.Push(type);
 
 
-            Expression returnEx;
+            Expression returnEx = null;
             if (providedTypes.ContainsKey(type))
             {
                 //Is provided
@@ -245,60 +261,109 @@ namespace SimpleFactory
             }
             else
             {
-
                 if (!Registered.ContainsKey(type)) throw new MissingRegistrationException(type);
+
+
 
                 RegistrationInfo registrationInfo = Registered[type];
 
-                if (registrationInfo.Factory != null) //The type is registered with factory not type.. 
+
+                if (registrationInfo.Factory) //The type is registered with factory not type.. 
                 {
-                    //Has factory
-                    ConstantExpression target = Expression.Constant(Registered[type]);
-                    MemberExpression memberExpression = Expression.MakeMemberAccess(target, RegistrationFactory);
-                    if(registrationInfo.LifeCycle == LifeTimeEnum.PerGraph)
+                    var paramList = new List<Expression>();
+                    ConstantExpression target = Expression.Constant(Registered[type].FactoryTarget);
+
+                    switch (registrationInfo.LifeCycle)
                     {
-                        ParameterExpression theVar; 
-                        if (!parameters.ContainsKey(type))
-                        {
-                            theVar = Expression.Variable(type);
-                            parameters[type] = theVar;
-                            assign.Add(Expression.Assign(theVar, Expression.Convert(Expression.Invoke(memberExpression, providedTypesParam), type)));
-                        } else
-                        {
-                            theVar = parameters[type];
-                        }
-                        
-                        returnEx = theVar;
+                        case LifeTimeEnum.Singleton:
+                            if (registrationInfo.Instance == null)
+                            {
+                                foreach (var p in registrationInfo.FactoryInfo.GetParameters())
+                                {
+                                    paramList.Add(CreateBuilders(p.ParameterType, parameters, assign, list, providedTypesParam, providedTypes));
+                                }
+                                var body = Expression.Call(target, registrationInfo.FactoryInfo, paramList);
+                                registrationInfo.Instance = Expression.Lambda<Func<Dictionary<Type, object>, object>>(body, providedTypesParam).Compile().Invoke(new Dictionary<Type, object>());
+                            }
+                            returnEx = Expression.Constant(registrationInfo.Instance);
+                            break;
+
+                        case LifeTimeEnum.PerGraph:
+
+                            ParameterExpression theVar;
+                            if (!parameters.ContainsKey(type))
+                            {
+                                theVar = Expression.Variable(type);
+                                parameters[type] = theVar;
+                                //assign.Add(Expression.Assign(theVar, Expression.Convert(Expression.Invoke(memberExpression, providedTypesParam), type)));
+                            }
+                            else
+                            {
+                                theVar = parameters[type];
+                            }
+                            returnEx = theVar;
+                            break;
+
+                        case LifeTimeEnum.Transient:
+
+
+                            foreach (var p in registrationInfo.FactoryInfo.GetParameters())
+                            {
+                                paramList.Add(CreateBuilders(p.ParameterType, parameters, assign, list, providedTypesParam, providedTypes));
+                            }
+                            returnEx = Expression.Call(target, registrationInfo.FactoryInfo, paramList);
+
+                            break;
                     }
-                    else
-                    {
-                        returnEx = Expression.Convert(Expression.Invoke(memberExpression, providedTypesParam), type);
-                    }
-                    
                 }
                 else
                 {
-                    if (registrationInfo.LifeCycle == LifeTimeEnum.PerGraph)
+                    var paramList = new List<Expression>();
+                    switch (registrationInfo.LifeCycle)
                     {
-                        ParameterExpression theVar; 
-                        if (!parameters.ContainsKey(type))
-                        {
-                            theVar =  Expression.Variable(type);
-                            parameters[type] = theVar;
-                            assign.Add(Expression.Assign(theVar,Expression.New(registrationInfo.Constructor, registrationInfo.ConstructorParams.Select(p => CreateBuilders(p.ParameterType, parameters,assign, list, providedTypesParam, providedTypes)))));
-                        }else
-                        {
-                            theVar = parameters[type];
-                        }
-                        returnEx = theVar;
+                        case LifeTimeEnum.Singleton:
+                            if (registrationInfo.Instance == null)
+                            {
+                                foreach (var param in registrationInfo.ConstructorParams)
+                                {
+                                    paramList.Add(CreateBuilders(param.ParameterType, parameters, assign, list, providedTypesParam, providedTypes));
+                                }
+                                var body = Expression.New(registrationInfo.Constructor, paramList);
+                                registrationInfo.Instance = Expression.Lambda<Func<Dictionary<Type, object>, object>>(body, providedTypesParam).Compile().Invoke(new Dictionary<Type, object>());
+                            }
+                            
+
+                            returnEx = Expression.Constant(registrationInfo.Instance);
+                            break;
+                        case LifeTimeEnum.PerGraph:
+                            ParameterExpression theVar;
+                            if (!parameters.ContainsKey(type))
+                            {
+                                theVar = Expression.Variable(type);
+                                parameters[type] = theVar;
+
+                                foreach (var param in registrationInfo.ConstructorParams)
+                                {
+                                    paramList.Add(CreateBuilders(param.ParameterType, parameters, assign, list, providedTypesParam, providedTypes));
+                                }
+                                assign.Add(Expression.Assign(theVar, Expression.New(registrationInfo.Constructor, paramList)));
+                            }
+                            else
+                            {
+                                theVar = parameters[type];
+                            }
+                            returnEx = theVar;
+                            break;
+                        case LifeTimeEnum.Transient:
+                            foreach (var param in registrationInfo.ConstructorParams)
+                            {
+                                paramList.Add(CreateBuilders(param.ParameterType, parameters, assign, list, providedTypesParam, providedTypes));
+                            }
+
+                            returnEx = Expression.New(registrationInfo.Constructor, paramList);
+                            break;
                     }
-                    else
-                    {
-                        //Create factory
-                        returnEx = Expression.New(registrationInfo.Constructor, registrationInfo.ConstructorParams.Select(p => CreateBuilders(p.ParameterType, parameters,assign, list, providedTypesParam, providedTypes)));
-                    }
-                        
-                        
+
                 }
             }
 

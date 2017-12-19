@@ -83,7 +83,7 @@ namespace SimpleFactory.Test
             var c = new SimpleFactory.Container();
 
 
-            c.Register<Dep1>().PerGraph();
+            c.Register<Dep1>(()=>new Dep1()).PerGraph();
             c.Register<Dep2>().PerGraph();
             c.Register<Dep3>().PerGraph();
             c.Register<Dep4>();
@@ -97,6 +97,43 @@ namespace SimpleFactory.Test
         }
 
 
+        [Test] public void SingletonIsReallySingleton()
+        {
+            var c = new SimpleFactory.Container();
+
+
+            c.Register<Dep1>().AsSingleton();
+            c.Register<Dep2>();
+            c.Register<Dep3>();
+            c.Register<Dep4>();
+            c.Register<Dep5>();
+
+            var d5 = c.CreateInstance<Dep5>();
+
+            var d1 = c.CreateInstance<Dep1>();
+            var d1_2 = c.CreateInstance<Dep1>();
+            //Assert.AreEqual(d5.dep3.dep2, d5.dep4.dep2);
+            Assert.AreEqual(d5.dep3.dep2.dep1, d5.dep4.dep2.dep1);
+            Assert.AreEqual(d1, d1_2);
+
+        }
+
+        [Test]
+        public void Asd()
+        {
+            var c = new SimpleFactory.Container();
+
+
+            c.Register<Dep1>();
+            c.Register<Dep2>().PerGraph();
+            c.Register<Dep3>();
+            c.Register<Dep4,Dep2,Dep3>((d2,d3) => new Dep4(d2) );
+            c.Register<Dep5>();
+                        
+            var d5 = c.CreateInstance<Dep5>();
+
+            Assert.AreEqual(d5.dep4.dep2,d5.dep3.dep2);
+        }
     }
 
 
