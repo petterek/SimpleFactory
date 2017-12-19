@@ -229,7 +229,7 @@ namespace SimpleFactory
             var providedTypesParam = Expression.Parameter(typeof(Dictionary<Type, object>));
             var parameters = new Dictionary<Type, ParameterExpression>();
             var assign = new List<Expression>();
-            Expression body = CreateBuilders(type, parameters, assign, list, providedTypesParam, providedTypes);
+            Expression body = CreateBuilders(type, parameters, assign, list, providedTypesParam, providedTypes,false);
 
             var paramEx = new List<ParameterExpression>();
             foreach (var v in parameters.Values)
@@ -246,7 +246,13 @@ namespace SimpleFactory
         }
 
 
-        private Expression CreateBuilders(Type type, Dictionary<Type, ParameterExpression> parameters, List<Expression> assign, Stack<Type> list, ParameterExpression providedTypesParam, Dictionary<Type, Object> providedTypes)
+        private Expression CreateBuilders(  Type type,
+                                            Dictionary<Type, ParameterExpression> parameters, 
+                                            List<Expression> assign, 
+                                            Stack<Type> list, 
+                                            ParameterExpression providedTypesParam, 
+                                            Dictionary<Type, Object> providedTypes,
+                                            bool mustBeSingleton)
         {
 
             if (list.Contains(type)) throw new CircularDependencyDetected();
@@ -266,7 +272,7 @@ namespace SimpleFactory
 
 
                 RegistrationInfo registrationInfo = Registered[type];
-
+                if (mustBeSingleton & registrationInfo.LifeCycle != LifeTimeEnum.Singleton) throw new Exceptions.UnAllowedConstruct();
 
                 if (registrationInfo.Factory) //The type is registered with factory not type.. 
                 {
@@ -280,7 +286,7 @@ namespace SimpleFactory
                             {
                                 foreach (var p in registrationInfo.FactoryInfo.GetParameters())
                                 {
-                                    paramList.Add(CreateBuilders(p.ParameterType, parameters, assign, list, providedTypesParam, providedTypes));
+                                    paramList.Add(CreateBuilders(p.ParameterType, parameters, assign, list, providedTypesParam, providedTypes,true));
                                 }
                                 var body = Expression.Call(target, registrationInfo.FactoryInfo, paramList);
                                 registrationInfo.Instance = Expression.Lambda<Func<Dictionary<Type, object>, object>>(body, providedTypesParam).Compile().Invoke(new Dictionary<Type, object>());
@@ -309,7 +315,7 @@ namespace SimpleFactory
 
                             foreach (var p in registrationInfo.FactoryInfo.GetParameters())
                             {
-                                paramList.Add(CreateBuilders(p.ParameterType, parameters, assign, list, providedTypesParam, providedTypes));
+                                paramList.Add(CreateBuilders(p.ParameterType, parameters, assign, list, providedTypesParam, providedTypes,false));
                             }
                             returnEx = Expression.Call(target, registrationInfo.FactoryInfo, paramList);
 
@@ -326,12 +332,12 @@ namespace SimpleFactory
                             {
                                 foreach (var param in registrationInfo.ConstructorParams)
                                 {
-                                    paramList.Add(CreateBuilders(param.ParameterType, parameters, assign, list, providedTypesParam, providedTypes));
+                                    paramList.Add(CreateBuilders(param.ParameterType, parameters, assign, list, providedTypesParam, providedTypes,true));
                                 }
                                 var body = Expression.New(registrationInfo.Constructor, paramList);
                                 registrationInfo.Instance = Expression.Lambda<Func<Dictionary<Type, object>, object>>(body, providedTypesParam).Compile().Invoke(new Dictionary<Type, object>());
                             }
-                            
+
 
                             returnEx = Expression.Constant(registrationInfo.Instance);
                             break;
@@ -344,7 +350,7 @@ namespace SimpleFactory
 
                                 foreach (var param in registrationInfo.ConstructorParams)
                                 {
-                                    paramList.Add(CreateBuilders(param.ParameterType, parameters, assign, list, providedTypesParam, providedTypes));
+                                    paramList.Add(CreateBuilders(param.ParameterType, parameters, assign, list, providedTypesParam, providedTypes,false));
                                 }
                                 assign.Add(Expression.Assign(theVar, Expression.New(registrationInfo.Constructor, paramList)));
                             }
@@ -357,7 +363,7 @@ namespace SimpleFactory
                         case LifeTimeEnum.Transient:
                             foreach (var param in registrationInfo.ConstructorParams)
                             {
-                                paramList.Add(CreateBuilders(param.ParameterType, parameters, assign, list, providedTypesParam, providedTypes));
+                                paramList.Add(CreateBuilders(param.ParameterType, parameters, assign, list, providedTypesParam, providedTypes,false));
                             }
 
                             returnEx = Expression.New(registrationInfo.Constructor, paramList);
