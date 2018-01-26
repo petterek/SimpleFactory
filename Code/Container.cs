@@ -48,6 +48,31 @@ namespace SimpleFactory
         }
 
 
+        public RegistrationInfo Register(Type t)
+        {
+            return Register(t, t);
+        }
+        public RegistrationInfo Register(Type identifierType, Type instanceType)
+        {
+            var constructor = instanceType.GetConstructors();
+            if (constructor.Length == 0)
+            {
+                throw new ArgumentOutOfRangeException($"Unable to construct type {instanceType.FullName}, no constructor found!");
+            }
+            if (constructor.Length > 1)
+            {
+                throw new TooManyConstructorsException(instanceType);
+            }
+
+            RegistrationInfo registrationInfo = new RegistrationInfo { Type = instanceType };
+            registrationInfo.Constructor = constructor[0];
+            registrationInfo.ConstructorParams = registrationInfo.Constructor.GetParameters();
+
+            Registered[identifierType] = registrationInfo;
+
+            return registrationInfo;
+        }
+
         public RegistrationInfo Register<TType>()
         {
             return Register<TType, TType>();
@@ -55,26 +80,9 @@ namespace SimpleFactory
 
         public RegistrationInfo Register<TInterface, TImplementedBy>() where TImplementedBy : TInterface
         {
-            Type type = typeof(TImplementedBy);
-
-            var constructor = type.GetConstructors();
-            if (constructor.Length == 0)
-            {
-                throw new ArgumentOutOfRangeException($"Unable to construct type {type.FullName}, no constructor found!");
-            }
-            if (constructor.Length > 1)
-            {
-                throw new TooManyConstructorsException(type);
-            }
-
-            RegistrationInfo registrationInfo = new RegistrationInfo { Type = type };
-            registrationInfo.Constructor = constructor[0];
-            registrationInfo.ConstructorParams = registrationInfo.Constructor.GetParameters();
-
-
-
-            Registered[typeof(TInterface)] = registrationInfo;
-            return registrationInfo;
+            Type identifierType = typeof(TInterface);
+            Type instanceType = typeof(TImplementedBy);
+            return Register(identifierType, instanceType);
         }
 
         public RegistrationInfo Register<TType>(Func<TType> factory)
