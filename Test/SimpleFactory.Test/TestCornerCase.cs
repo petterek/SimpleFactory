@@ -62,7 +62,7 @@ namespace SimpleFactory.Test
         public void LifcycleWorksAsExpetced()
         {
             var c = new SimpleFactory.Container();
-            
+
 
             c.Register<Dep1>().PerGraph();
             c.Register<Dep2>();
@@ -71,9 +71,9 @@ namespace SimpleFactory.Test
             c.Register<Dep5>();
 
             var d5 = c.CreateInstance<Dep5>();
-           
+
             Assert.AreNotEqual(d5.dep3.dep2, d5.dep4.dep2);
-            Assert.AreEqual(d5.dep3.dep2.dep1,d5.dep4.dep2.dep1);
+            Assert.AreEqual(d5.dep3.dep2.dep1, d5.dep4.dep2.dep1);
 
         }
 
@@ -83,7 +83,7 @@ namespace SimpleFactory.Test
             var c = new SimpleFactory.Container();
 
 
-            c.Register<Dep1>(()=>new Dep1()).PerGraph();
+            c.Register<Dep1>(() => new Dep1()).PerGraph();
             c.Register<Dep2>().PerGraph();
             c.Register<Dep3>().PerGraph();
             c.Register<Dep4>();
@@ -97,7 +97,8 @@ namespace SimpleFactory.Test
         }
 
 
-        [Test] public void SingletonIsReallySingleton()
+        [Test]
+        public void SingletonIsReallySingleton()
         {
             var c = new SimpleFactory.Container();
 
@@ -127,13 +128,45 @@ namespace SimpleFactory.Test
             c.Register<Dep1>();
             c.Register<Dep2>().PerGraph();
             c.Register<Dep3>();
-            c.Register<Dep4,Dep2,Dep3>((d2,d3) => new Dep4(d2) );
+            c.Register<Dep4, Dep2, Dep3>((d2, d3) => new Dep4(d2));
             c.Register<Dep5>();
-                        
+
             var d5 = c.CreateInstance<Dep5>();
 
-            Assert.AreEqual(d5.dep4.dep2,d5.dep3.dep2);
+            Assert.AreEqual(d5.dep4.dep2, d5.dep3.dep2);
         }
+
+
+        [Test]
+        public void SetDefaultLifeTime()
+        {
+            var c = new SimpleFactory.Container(LifeTimeEnum.PerGraph);
+
+            c.Register<Dep1>();
+            c.Register<Dep2>();
+            c.Register<Dep3>();
+            c.Register<Dep4, Dep2, Dep3>(
+                (d2, d3) => new Dep4(d2)
+            );
+            c.Register<Dep5>();
+            var d5 = c.CreateInstance<Dep5>();
+
+            Assert.AreEqual(d5.dep4.dep2, d5.dep3.dep2);
+        }
+
+        [Test]
+        public void PerGraphLifetimeWorksWithFactoryMethod()
+        {
+            var c = new SimpleFactory.Container(LifeTimeEnum.PerGraph);
+
+            c.Register<Dep1>(() => new Dep1());
+            c.Register<Dep2>();
+
+            var res = c.CreateInstance<Dep2>();
+
+            Assert.IsNotNull(res.dep1);
+        }
+
     }
 
 
@@ -156,9 +189,9 @@ namespace SimpleFactory.Test
     public class Dep3
     {
         public readonly Dep2 dep2;
-        
 
-        public Dep3( Dep2 dep2)
+
+        public Dep3(Dep2 dep2)
         {
             this.dep2 = dep2;
         }
@@ -180,7 +213,7 @@ namespace SimpleFactory.Test
         public readonly Dep4 dep4;
         public readonly Dep3 dep3;
 
-        public Dep5(Dep3 dep3,Dep4 dep4)
+        public Dep5(Dep3 dep3, Dep4 dep4)
         {
             this.dep3 = dep3;
             this.dep4 = dep4;

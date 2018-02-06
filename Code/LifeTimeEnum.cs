@@ -1,6 +1,6 @@
 ﻿namespace SimpleFactory
 {
-    internal enum LifeTimeEnum
+    public enum LifeTimeEnum
     {
         Transient,
         Singleton,
