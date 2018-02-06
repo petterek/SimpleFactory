@@ -18,11 +18,11 @@ namespace SimpleFactory
         internal ParameterInfo[] ConstructorParams;
         public void AsSingleton() { LifeCycle = LifeTimeEnum.Singleton; }
         public void PerGraph() { LifeCycle = LifeTimeEnum.PerGraph; }
-
+        public void Transient() { LifeCycle = LifeTimeEnum.Transient; }
 
         internal object Instance;
 
-        internal LifeTimeEnum LifeCycle { get; private set; }
+        internal LifeTimeEnum LifeCycle { get;  set; }
     }
 
 
@@ -38,6 +38,7 @@ namespace SimpleFactory
         private MethodInfo containerMi;
         private MemberInfo RegistrationFactory;
         private Dictionary<Type, MethodInfo> GenericTypeCache = new Dictionary<Type, MethodInfo>();
+        private readonly LifeTimeEnum defaultLifeTimeEnum;
 
         public Container()
         {
@@ -45,6 +46,12 @@ namespace SimpleFactory
             containsKey = typeof(Dictionary<Type, object>).GetMethod("ContainsKey");
             containerMi = typeof(Container).GetMethod(nameof(CreateInstance), new Type[] { typeof(object[]) });
             RegistrationFactory = typeof(RegistrationInfo).GetField("Factory");
+            defaultLifeTimeEnum = LifeTimeEnum.Transient;
+        }
+
+        public Container(LifeTimeEnum defaultLifeTimeEnum) : this()
+        {
+            this.defaultLifeTimeEnum = defaultLifeTimeEnum;
         }
 
 
@@ -68,6 +75,7 @@ namespace SimpleFactory
             registrationInfo.Constructor = constructor[0];
             registrationInfo.ConstructorParams = registrationInfo.Constructor.GetParameters();
 
+            registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[identifierType] = registrationInfo;
 
             return registrationInfo;
@@ -94,7 +102,7 @@ namespace SimpleFactory
                 FactoryInfo = factory.GetMethodInfo(),
                 FactoryTarget = factory.Target
             };
-
+            registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
@@ -107,7 +115,7 @@ namespace SimpleFactory
                 FactoryTarget = factory.Target,
                 Factory = true
             };
-
+            registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
@@ -120,6 +128,7 @@ namespace SimpleFactory
                 FactoryTarget = factory.Target,
                 Factory = true
             };
+            registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
@@ -132,6 +141,7 @@ namespace SimpleFactory
                 FactoryTarget = factory.Target,
                 Factory = true
             };
+            registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
@@ -144,6 +154,7 @@ namespace SimpleFactory
                 FactoryTarget = factory.Target,
                 Factory = true
             };
+            registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
@@ -156,6 +167,7 @@ namespace SimpleFactory
                 FactoryTarget = factory.Target,
                 Factory = true
             };
+            registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
@@ -168,6 +180,7 @@ namespace SimpleFactory
                 FactoryTarget = factory.Target,
                 Factory = true
             };
+            registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
@@ -180,6 +193,7 @@ namespace SimpleFactory
                 FactoryTarget = factory.Target,
                 Factory = true
             };
+            registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
@@ -309,7 +323,11 @@ namespace SimpleFactory
                             {
                                 theVar = Expression.Variable(type);
                                 parameters[type] = theVar;
-                                //assign.Add(Expression.Assign(theVar, Expression.Convert(Expression.Invoke(memberExpression, providedTypesParam), type)));
+                                foreach (var p in registrationInfo.FactoryInfo.GetParameters())
+                                {
+                                    paramList.Add(CreateBuilders(p.ParameterType, parameters, assign, list, providedTypesParam, providedTypes, false));
+                                }
+                                assign.Add(Expression.Assign(theVar, Expression.Call(target, registrationInfo.FactoryInfo, paramList)));
                             }
                             else
                             {
