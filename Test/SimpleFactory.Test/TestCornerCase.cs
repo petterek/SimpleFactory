@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using SimpleFactory.Contract;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,6 @@ namespace SimpleFactory.Test
             c.Register<A1>();
             c.Register<A2>();
             c.Register<RepoMock>();
-
             c.CreateInstance<A1>();
         }
 
@@ -167,8 +167,28 @@ namespace SimpleFactory.Test
             Assert.IsNotNull(res.dep1);
         }
 
+
+        [Test]
+        public void UsingStaticMethodAsFactoryDoesNotThrow()
+        {
+            var container = new Container();
+
+            container.Register<Dep1>(FactoryHolder.Factory);
+
+            var dep = container.CreateInstance<Dep1>();
+
+            Assert.IsNotNull(dep); 
+        }
+
     }
 
+    public static class FactoryHolder
+    {
+        public static Dep1 Factory()
+        {
+            return new Dep1();
+        }
+    }
 
     public class Dep1
     {

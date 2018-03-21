@@ -1,4 +1,4 @@
-﻿namespace SimpleFactory
+﻿namespace SimpleFactory.Contract
 {
     public enum LifeTimeEnum
     {
