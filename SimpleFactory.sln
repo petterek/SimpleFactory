@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFactory", "Code\SimpleFactory.csproj", "{4376E8BF-CA9C-49C8-8876-657728290960}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleFactory", "Code\SimpleFactory.csproj", "{4376E8BF-CA9C-49C8-8876-657728290960}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFactory.Test", "Test\SimpleFactory.Test\SimpleFactory.Test.csproj", "{82C4B800-5673-4CEE-9378-F1BCE61D57E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleFactory.Test", "Test\SimpleFactory.Test\SimpleFactory.Test.csproj", "{82C4B800-5673-4CEE-9378-F1BCE61D57E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFactory.Contract", "SimpleFactory.Contract\SimpleFactory.Contract.csproj", "{3273B90F-4CDF-493A-8AB0-16C7B6A74AF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +23,15 @@ Global
 		{82C4B800-5673-4CEE-9378-F1BCE61D57E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82C4B800-5673-4CEE-9378-F1BCE61D57E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82C4B800-5673-4CEE-9378-F1BCE61D57E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3273B90F-4CDF-493A-8AB0-16C7B6A74AF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3273B90F-4CDF-493A-8AB0-16C7B6A74AF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3273B90F-4CDF-493A-8AB0-16C7B6A74AF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3273B90F-4CDF-493A-8AB0-16C7B6A74AF1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {31872119-8B93-4B55-9382-E992720916F5}
 	EndGlobalSection
 EndGlobal
