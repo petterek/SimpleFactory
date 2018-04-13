@@ -2,17 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>2.5.1.0</AssemblyVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>True</IncludeSymbols>
-
-    <Version>2.5.1</Version>
-
     <PackageReleaseNotes></PackageReleaseNotes>
+    <Version>2.6.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="SimpleFactory.Contract" Version="1.0.1" />
   </ItemGroup>
-
 </Project>
