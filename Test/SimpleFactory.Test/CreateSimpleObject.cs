@@ -19,7 +19,6 @@ namespace SimpleFactory.Test
             var test = container.CreateInstance<SimpleOne>();
 
             Assert.IsInstanceOf<SimpleOne>(test);
-
         }
 
         [Test]
@@ -50,7 +49,6 @@ namespace SimpleFactory.Test
             Assert.IsInstanceOf<WithInjected>(test);
             Assert.AreEqual(2, test.p.value);
 
-
             var test2 = container.CreateInstance<WithInjected>(new Dictionary<Type, object> { { typeof(NotSoSimple), new NotSoSimple(new SimpleOne()) { value = 4 } } });
             Assert.AreEqual(4, test2.p.value);
         }
@@ -62,48 +60,52 @@ namespace SimpleFactory.Test
             container.Register<ISimpleInterface, SimpleOne>();
             var test = container.CreateInstance<ISimpleInterface>();
             Assert.IsInstanceOf<SimpleOne>(test);
-
         }
 
         [Test]
         public void RegisterWithFactory()
         {
             var container = new Container();
-            container.Register<ISimpleInterface>(()=> new SimpleOne());
+            container.Register<ISimpleInterface>(() => new SimpleOne());
             var test = container.CreateInstance<ISimpleInterface>();
             Assert.IsInstanceOf<SimpleOne>(test);
-
         }
 
-        [Test] public void ReolveFieldsTest()
+        [Test]
+        public void ReolveFieldsTest()
         {
             var container = new Container();
             container.Register<ISimpleInterface, SimpleOne>();
             var toFill = new ClassWithFields();
 
-            Assert.DoesNotThrow(()=> container.ResolveFields(toFill,3,new Object(),new SimpleOne()));
+            Assert.DoesNotThrow(() => container.ResolveFields(toFill, 3, new Object(), new SimpleOne()));
             Assert.IsInstanceOf<SimpleOne>(toFill.Simple);
-
         }
 
-    }
+        [Test]
+        public void GetInjectionWhenSuperTypeIsRegisterd()
+        {
+            var container = new Container();
+            container.Register<WithSuperClassNeeds>();
 
+            Assert.DoesNotThrow(() => container.CreateInstance<WithSuperClassNeeds>(new SimpleTwo()));
+        }
+    }
 
     public class ClassWithFields
     {
         public ISimpleInterface Simple;
     }
 
-
     public interface ISimpleInterface
-    {    }
+    { }
 
     public class SimpleOne : ISimpleInterface
-    {    }
+    { }
 
     public class NotSoSimple
     {
-        readonly SimpleOne p;
+        private readonly SimpleOne p;
 
         public int value = 1;
 
@@ -123,7 +125,17 @@ namespace SimpleFactory.Test
         }
     }
 
+    public class SimpleTwo : SimpleOne
+    {
+    }
 
+    public class WithSuperClassNeeds
+    {
+        private readonly SimpleOne simple;
 
-
+        public WithSuperClassNeeds(SimpleOne simple)
+        {
+            this.simple = simple;
+        }
+    }
 }

@@ -8,12 +8,8 @@ using SimpleFactory.Exceptions;
 
 namespace SimpleFactory
 {
-
-
-
     public class Container : IContainer
     {
-
         private Dictionary<string, Func<Dictionary<Type, Object>, object>> creatorFunctions = new Dictionary<string, Func<Dictionary<Type, object>, object>>();
         private Dictionary<Type, RegistrationInfo> Registered = new Dictionary<Type, RegistrationInfo>();
 
@@ -37,11 +33,12 @@ namespace SimpleFactory
         {
             this.defaultLifeTimeEnum = defaultLifeTimeEnum;
         }
-        
+
         public IRegistrationInfo Register(Type t)
         {
             return Register(t, t);
         }
+
         public IRegistrationInfo Register(Type identifierType, Type instanceType)
         {
             var constructor = instanceType.GetConstructors();
@@ -89,6 +86,7 @@ namespace SimpleFactory
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
+
         public IRegistrationInfo Register<TType, TParam1>(Func<TParam1, TType> factory)
         {
             RegistrationInfo registrationInfo = new RegistrationInfo
@@ -102,6 +100,7 @@ namespace SimpleFactory
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
+
         public IRegistrationInfo Register<TType, TParam1, TParam2>(Func<TParam1, TParam2, TType> factory)
         {
             RegistrationInfo registrationInfo = new RegistrationInfo
@@ -115,6 +114,7 @@ namespace SimpleFactory
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
+
         public IRegistrationInfo Register<TType, TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, TType> factory)
         {
             RegistrationInfo registrationInfo = new RegistrationInfo
@@ -128,6 +128,7 @@ namespace SimpleFactory
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
+
         public IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4>(Func<TParam1, TParam2, TParam3, TParam4, TType> factory)
         {
             RegistrationInfo registrationInfo = new RegistrationInfo
@@ -141,6 +142,7 @@ namespace SimpleFactory
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
+
         public IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TType> factory)
         {
             RegistrationInfo registrationInfo = new RegistrationInfo
@@ -154,6 +156,7 @@ namespace SimpleFactory
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
+
         public IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TType> factory)
         {
             RegistrationInfo registrationInfo = new RegistrationInfo
@@ -167,6 +170,7 @@ namespace SimpleFactory
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
+
         public IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TType> factory)
         {
             RegistrationInfo registrationInfo = new RegistrationInfo
@@ -180,7 +184,7 @@ namespace SimpleFactory
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
-        
+
         public IEnumerable<IRegistrationInfo> Items()
         {
             foreach (var item in Registered)
@@ -198,6 +202,7 @@ namespace SimpleFactory
         {
             return CreateInstance(toCreate, new Dictionary<Type, object>());
         }
+
         public object CreateAnonymousInstance(Type toCreate, params object[] providedTypes)
         {
             return CreateInstance(toCreate, providedTypes.ToDictionary(o => o.GetType()));
@@ -207,6 +212,7 @@ namespace SimpleFactory
         {
             return CreateInstance<TToCreate>(providedTypes.ToDictionary(o => o.GetType()));
         }
+
         public TToCreate CreateInstance<TToCreate>(Dictionary<Type, Object> providedTypes)
         {
             if (providedTypes == null)
@@ -223,16 +229,14 @@ namespace SimpleFactory
             }
 
             return (TToCreate)CreateInstance(typeof(TToCreate), providedTypes);
-
         }
 
         private Func<Dictionary<Type, object>, object> BuildLambda(Type type, Stack<Type> list, Dictionary<Type, Object> providedTypes)
         {
-
             var providedTypesParam = Expression.Parameter(typeof(Dictionary<Type, object>));
             var parameters = new Dictionary<Type, ParameterExpression>();
             var assign = new List<Expression>();
-            Expression body = CreateBuilders(type, parameters, assign, list, providedTypesParam, providedTypes,false);
+            Expression body = CreateBuilders(type, parameters, assign, list, providedTypesParam, providedTypes, false);
 
             var paramEx = new List<ParameterExpression>();
             foreach (var v in parameters.Values)
@@ -245,11 +249,9 @@ namespace SimpleFactory
             BlockExpression body1 = Expression.Block(paramEx, assign);
 
             return Expression.Lambda<Func<Dictionary<Type, object>, object>>(body1, providedTypesParam).Compile();
-
         }
 
-
-        Expression CreateBuilders(Type type,
+        private Expression CreateBuilders(Type type,
                                             Dictionary<Type, ParameterExpression> parameters,
                                             List<Expression> assign,
                                             Stack<Type> list,
@@ -257,27 +259,41 @@ namespace SimpleFactory
                                             Dictionary<Type, Object> providedTypes,
                                             bool mustBeSingleton)
         {
-
             if (list.Contains(type)) throw new CircularDependencyDetected();
             list.Push(type);
 
-
             Expression returnEx = null;
-            if (providedTypes.ContainsKey(type))
+
+            if (providedTypes.ContainsKey(type)) //If you add a provided type, this will "win"
             {
-                //Is provided
                 returnEx = Expression.Convert(Expression.Property(providedTypesParam, "Item", Expression.Constant(type)), type);
+            }
+            else if (!Registered.ContainsKey(type)) //The requested type is not provided nor registered, we must loop trough the list of provided to see if we can find a super that match
+            {
+                foreach (var item in providedTypes)
+                {
+                    var basetype = type;
+                    while (basetype != null)
+                    {
+                        if (basetype.IsAssignableFrom(type))
+                        {
+                            returnEx = Expression.Convert(Expression.Property(providedTypesParam, "Item", Expression.Constant(item.Key)), type);
+                            break;
+                        }
+                        basetype = type.BaseType;
+                    }
+                }
+
+                if (returnEx == null) { throw new MissingRegistrationException(type); }
+
+                //Is provided
             }
             else
             {
-                if (!Registered.ContainsKey(type)) throw new MissingRegistrationException(type);
-
-
-
                 RegistrationInfo registrationInfo = Registered[type];
                 if (mustBeSingleton & registrationInfo.LifeCycle != LifeTimeEnum.Singleton) throw new Exceptions.UnAllowedConstruct();
 
-                if (registrationInfo.Factory) //The type is registered with factory not type.. 
+                if (registrationInfo.Factory) //The type is registered with factory not type..
                 {
                     var paramList = new List<Expression>();
                     ConstantExpression target = Expression.Constant(Registered[type].FactoryTarget);
@@ -319,18 +335,18 @@ namespace SimpleFactory
 
                         case LifeTimeEnum.Transient:
 
-
                             foreach (var p in registrationInfo.FactoryInfo.GetParameters())
                             {
                                 paramList.Add(CreateBuilders(p.ParameterType, parameters, assign, list, providedTypesParam, providedTypes, false));
                             }
-                            if (registrationInfo.FactoryInfo.IsStatic) {
+                            if (registrationInfo.FactoryInfo.IsStatic)
+                            {
                                 returnEx = Expression.Call(null, registrationInfo.FactoryInfo, paramList);
-                            } else
+                            }
+                            else
                             {
                                 returnEx = Expression.Call(target, registrationInfo.FactoryInfo, paramList);
                             }
-                            
 
                             break;
                     }
@@ -351,9 +367,9 @@ namespace SimpleFactory
                                 registrationInfo.Instance = Expression.Lambda<Func<Dictionary<Type, object>, object>>(body, providedTypesParam).Compile().Invoke(new Dictionary<Type, object>());
                             }
 
-
                             returnEx = Expression.Constant(registrationInfo.Instance);
                             break;
+
                         case LifeTimeEnum.PerGraph:
                             ParameterExpression theVar;
                             if (!parameters.ContainsKey(type))
@@ -373,6 +389,7 @@ namespace SimpleFactory
                             }
                             returnEx = theVar;
                             break;
+
                         case LifeTimeEnum.Transient:
                             foreach (var param in registrationInfo.ConstructorParams)
                             {
@@ -382,17 +399,13 @@ namespace SimpleFactory
                             returnEx = Expression.New(registrationInfo.Constructor, paramList);
                             break;
                     }
-
                 }
             }
 
             list.Pop();
 
             return returnEx;
-
         }
-
-
 
         private object CreateInstance(Type toCreate, Dictionary<Type, Object> providedTypes)
         {
@@ -422,7 +435,7 @@ namespace SimpleFactory
 
             return ret;
         }
-        
+
         private MethodInfo GetGenericMethod(Type t)
         {
             if (!GenericTypeCache.ContainsKey(t))
@@ -438,15 +451,12 @@ namespace SimpleFactory
             return GenericTypeCache[t];
         }
 
-
         public void ResolveFields(object loader, params object[] providedInstances)
         {
             foreach (var fi in loader.GetType().GetFields())
             {
                 fi.SetValue(loader, GetGenericMethod(fi.FieldType).Invoke(this, new object[] { providedInstances }));
             }
-
         }
-
     }
 }
