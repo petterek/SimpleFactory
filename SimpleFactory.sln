@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleFactory", "Code\Simpl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleFactory.Test", "Test\SimpleFactory.Test\SimpleFactory.Test.csproj", "{82C4B800-5673-4CEE-9378-F1BCE61D57E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFactory.Contract", "SimpleFactory.Contract\SimpleFactory.Contract.csproj", "{3273B90F-4CDF-493A-8AB0-16C7B6A74AF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleFactory.Contract", "SimpleFactory.Contract\SimpleFactory.Contract.csproj", "{3273B90F-4CDF-493A-8AB0-16C7B6A74AF1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A5AD46D0-27C3-4800-8159-3E023ED156F9}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
