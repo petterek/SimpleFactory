@@ -9,7 +9,6 @@ namespace SimpleFactory.Test
     [TestFixture]
     public class TestCornerCase
     {
-
         [Test]
         public void CorneCase1()
         {
@@ -33,7 +32,6 @@ namespace SimpleFactory.Test
             c.CreateInstance<Adder>().Add();
 
             Assert.AreEqual(2, c.CreateInstance<Adder>().Sum);
-
         }
 
         [Test]
@@ -56,13 +54,10 @@ namespace SimpleFactory.Test
             c.CreateInstance<A2>(new RepoMock());
         }
 
-
-
         [Test]
         public void LifcycleWorksAsExpetced()
         {
             var c = new SimpleFactory.Container();
-
 
             c.Register<Dep1>().PerGraph();
             c.Register<Dep2>();
@@ -74,14 +69,12 @@ namespace SimpleFactory.Test
 
             Assert.AreNotEqual(d5.dep3.dep2, d5.dep4.dep2);
             Assert.AreEqual(d5.dep3.dep2.dep1, d5.dep4.dep2.dep1);
-
         }
 
         [Test]
         public void LifcycleWorksAsExpetcedOnManyLevels()
         {
             var c = new SimpleFactory.Container();
-
 
             c.Register<Dep1>(() => new Dep1()).PerGraph();
             c.Register<Dep2>().PerGraph();
@@ -93,15 +86,12 @@ namespace SimpleFactory.Test
 
             Assert.AreEqual(d5.dep3.dep2, d5.dep4.dep2);
             Assert.AreEqual(d5.dep3.dep2.dep1, d5.dep4.dep2.dep1);
-
         }
-
 
         [Test]
         public void SingletonIsReallySingleton()
         {
             var c = new SimpleFactory.Container();
-
 
             c.Register<Dep1>().AsSingleton();
             c.Register<Dep2>();
@@ -116,14 +106,12 @@ namespace SimpleFactory.Test
             //Assert.AreEqual(d5.dep3.dep2, d5.dep4.dep2);
             Assert.AreEqual(d5.dep3.dep2.dep1, d5.dep4.dep2.dep1);
             Assert.AreEqual(d1, d1_2);
-
         }
 
         [Test]
         public void Asd()
         {
             var c = new SimpleFactory.Container();
-
 
             c.Register<Dep1>();
             c.Register<Dep2>().PerGraph();
@@ -135,7 +123,6 @@ namespace SimpleFactory.Test
 
             Assert.AreEqual(d5.dep4.dep2, d5.dep3.dep2);
         }
-
 
         [Test]
         public void SetDefaultLifeTime()
@@ -167,7 +154,6 @@ namespace SimpleFactory.Test
             Assert.IsNotNull(res.dep1);
         }
 
-
         [Test]
         public void UsingStaticMethodAsFactoryDoesNotThrow()
         {
@@ -177,9 +163,33 @@ namespace SimpleFactory.Test
 
             var dep = container.CreateInstance<Dep1>();
 
-            Assert.IsNotNull(dep); 
+            Assert.IsNotNull(dep);
         }
 
+        [Test]
+        public void SendInParametrThatIsnotInUser()
+        {
+            var c = new Container();
+
+            c.Register<Dummy>();
+            c.Register<DummyNotInuse>();
+            c.Register<Dep1>();
+
+            var dummy = c.CreateInstance<Dummy>(new DummyNotInuse());
+
+            Assert.IsInstanceOf<Dummy>(dummy);
+        }
+    }
+
+    public class Dummy
+    {
+        public Dummy(Dep1 dep)
+        {
+        }
+    }
+
+    public class DummyNotInuse
+    {
     }
 
     public static class FactoryHolder
@@ -192,7 +202,6 @@ namespace SimpleFactory.Test
 
     public class Dep1
     {
-
     }
 
     public class Dep2
@@ -203,13 +212,11 @@ namespace SimpleFactory.Test
         {
             this.dep1 = dep1;
         }
-
     }
 
     public class Dep3
     {
         public readonly Dep2 dep2;
-
 
         public Dep3(Dep2 dep2)
         {
@@ -220,7 +227,6 @@ namespace SimpleFactory.Test
     public class Dep4
     {
         public readonly Dep2 dep2;
-
 
         public Dep4(Dep2 dep2)
         {
@@ -240,15 +246,14 @@ namespace SimpleFactory.Test
         }
     }
 
-
     public class RepoMock
     {
     }
 
     public class A1
     {
-        readonly RepoMock r;
-        readonly A2 a2;
+        private readonly RepoMock r;
+        private readonly A2 a2;
 
         public A1(RepoMock r, A2 a2)
         {
@@ -259,13 +264,13 @@ namespace SimpleFactory.Test
 
     public class A2
     {
-        readonly RepoMock r;
+        private readonly RepoMock r;
+
         public A2(RepoMock r)
         {
             this.r = r;
         }
     }
-
 
     public class Adder
     {
@@ -273,9 +278,9 @@ namespace SimpleFactory.Test
         {
             Sum += 1;
         }
+
         public int Sum;
     }
-
 
     public class Result
     {
@@ -284,33 +289,30 @@ namespace SimpleFactory.Test
 
     public class Param
     {
-
     }
 
     public interface ISomeService
     {
         Result Handle(Param p);
-
     }
 
     public class SomeService : ISomeService
     {
-        readonly SomeDep dep;
+        private readonly SomeDep dep;
 
         public SomeService(SomeDep dep)
         {
             this.dep = dep;
         }
+
         public Result Handle(Param p)
         {
             return new Result { Value = dep.SomeStrangeValue };
         }
     }
 
-
     public class SomeDep
     {
-
         public int SomeStrangeValue;
 
         public SomeDep()
@@ -318,7 +320,6 @@ namespace SimpleFactory.Test
             SomeStrangeValue = 100;
         }
     }
-
 
     public class Wrapper
     {
@@ -333,6 +334,7 @@ namespace SimpleFactory.Test
         {
             di.Register<TInt, TInst>();
         }
+
         public void Register<T>(Func<object, T> func)
         {
             di.Register<T, object>(e => func(e));
@@ -342,10 +344,5 @@ namespace SimpleFactory.Test
         {
             return di.CreateInstance<T>(provided.ToDictionary(e => e.GetType()));
         }
-
     }
-
-
-
-
 }
