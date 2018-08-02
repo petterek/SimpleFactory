@@ -5,10 +5,10 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>True</IncludeSymbols>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <Version>2.6.0</Version>
+    <Version>2.7.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SimpleFactory.Contract" Version="1.0.1" />
+    <PackageReference Include="SimpleFactory.Contract" Version="1.1.0" />
   </ItemGroup>
 </Project>

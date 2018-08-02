@@ -66,6 +66,12 @@ namespace SimpleFactory
             return Register<TType, TType>();
         }
 
+        public IRegistrationInfo Register<TInterface>(Type implementedBy)
+        {
+            Type identifierType = typeof(TInterface);
+            return Register(identifierType, implementedBy);
+        }
+
         public IRegistrationInfo Register<TInterface, TImplementedBy>() where TImplementedBy : TInterface
         {
             Type identifierType = typeof(TInterface);
