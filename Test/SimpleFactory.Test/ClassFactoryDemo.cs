@@ -88,6 +88,15 @@ namespace SimpleFactory.Test
                 new Class3(new Class1(), new Class2(new Class1()))));
         }
 
+        [Test]
+        public void RegestringNonCompatiableTypeThrowsException()
+        {
+            var container = new Container();
+
+            Assert.Throws<ArgumentException>(() => container.Register<IClass1>(typeof(object)));
+            Assert.DoesNotThrow(() => container.Register<object>(typeof(object)));
+        }
+
         public interface IClass1 { }
 
         public interface IClass2 { }

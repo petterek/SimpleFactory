@@ -68,6 +68,10 @@ namespace SimpleFactory
 
         public IRegistrationInfo Register<TInterface>(Type implementedBy)
         {
+            if (!typeof(TInterface).IsAssignableFrom(implementedBy))
+            {
+                throw new ArgumentException($"Parameter implementedBy must implement type {typeof(TInterface).FullName}");
+            }
             Type identifierType = typeof(TInterface);
             return Register(identifierType, implementedBy);
         }
