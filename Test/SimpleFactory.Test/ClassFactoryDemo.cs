@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using SimpleFactory.Contract;
+using System;
 
 namespace SimpleFactory.Test
 {
@@ -95,6 +92,16 @@ namespace SimpleFactory.Test
 
             Assert.Throws<ArgumentException>(() => container.Register<IClass1>(typeof(object)));
             Assert.DoesNotThrow(() => container.Register<object>(typeof(object)));
+        }
+
+        [Test]
+        public void IsRegiteredReturnsTrue()
+        {
+            var container = new Container();
+            container.Register<IClass1, Class1>();
+
+            Assert.IsFalse(container.IsRegistered<IClass2>());
+            Assert.IsTrue(container.IsRegistered<IClass1>());
         }
 
         public interface IClass1 { }

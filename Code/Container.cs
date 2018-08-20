@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SimpleFactory.Contract;
+using SimpleFactory.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using SimpleFactory.Contract;
-using SimpleFactory.Exceptions;
 
 namespace SimpleFactory
 {
@@ -32,6 +32,11 @@ namespace SimpleFactory
         public Container(LifeTimeEnum defaultLifeTimeEnum) : this()
         {
             this.defaultLifeTimeEnum = defaultLifeTimeEnum;
+        }
+
+        public bool IsRegistered<TInterface>()
+        {
+            return Registered.ContainsKey(typeof(TInterface));
         }
 
         public IRegistrationInfo Register(Type t)
@@ -63,6 +68,7 @@ namespace SimpleFactory
 
         public IRegistrationInfo Register<TType>()
         {
+            if (typeof(TType).IsInterface) throw new ArgumentException("Type cannot be an Interface");
             return Register<TType, TType>();
         }
 
@@ -195,12 +201,9 @@ namespace SimpleFactory
             return registrationInfo;
         }
 
-        public IEnumerable<IRegistrationInfo> Items()
+        public IList<IRegistrationInfo> Items()
         {
-            foreach (var item in Registered)
-            {
-                yield return item.Value;
-            }
+            return Registered.Select(el => (IRegistrationInfo)el.Value).ToList();
         }
 
         public TToCreate CreateInstance<TToCreate>()
