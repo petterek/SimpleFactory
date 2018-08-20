@@ -15,7 +15,9 @@ namespace SimpleFactory.Contract
 
         TToCreate CreateInstance<TToCreate>(params object[] providedTypes);
 
-        IEnumerable<IRegistrationInfo> Items();
+        IList<IRegistrationInfo> Items();
+
+        bool IsRegistered<TInterface>();
 
         IRegistrationInfo Register(Type t);
 
