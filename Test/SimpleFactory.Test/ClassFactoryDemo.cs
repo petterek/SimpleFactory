@@ -26,6 +26,8 @@ namespace SimpleFactory.Test
                 );
         }
 
+      
+
         [Test]
         public void InjectBasicWithRegistration()
         {
@@ -81,8 +83,8 @@ namespace SimpleFactory.Test
             ClassThatNeedsClass3 inst = null;
             Assert.Throws<Exceptions.MissingRegistrationException>(() => inst = container.CreateInstance<ClassThatNeedsClass3>());
 
-            Assert.DoesNotThrow(() => inst = container.CreateInstance<ClassThatNeedsClass3>(
-                new Class3(new Class1(), new Class2(new Class1()))));
+            Assert.DoesNotThrow(() =>  container.CreateInstance<ClassThatNeedsClass3>(new Class3(new Class1(), new Class2(new Class1()))));
+            Assert.DoesNotThrow(() =>  container.CreateInstance<Class3>(new Class2(new Class1()), new Class1()));
         }
 
         [Test]

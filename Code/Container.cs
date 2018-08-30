@@ -283,20 +283,20 @@ namespace SimpleFactory
             }
             else if (!Registered.ContainsKey(type)) //The requested type is not provided nor registered, we must loop trough the list of provided to see if we can find a super that match
             {
-                foreach (var item in providedTypes)
+                var basetype = type;
+                
+                while (basetype != null)
                 {
-                    var basetype = type;
-                    while (basetype != null)
+                    foreach (var item in providedTypes)
                     {
                         if (basetype.IsAssignableFrom(item.Key))
                         {
                             returnEx = Expression.Convert(Expression.Property(providedTypesParam, "Item", Expression.Constant(item.Key)), type);
                             break;
                         }
-                        if (returnEx != null) break;
-
-                        basetype = type.BaseType;
                     }
+                    if (returnEx != null) break;
+                    basetype = basetype.BaseType;
                 }
 
                 if (returnEx == null) { throw new MissingRegistrationException(type); }
