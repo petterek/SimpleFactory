@@ -293,6 +293,8 @@ namespace SimpleFactory
                             returnEx = Expression.Convert(Expression.Property(providedTypesParam, "Item", Expression.Constant(item.Key)), type);
                             break;
                         }
+                        if (returnEx != null) break;
+
                         basetype = type.BaseType;
                     }
                 }
