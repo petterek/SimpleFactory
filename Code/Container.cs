@@ -288,7 +288,7 @@ namespace SimpleFactory
                     var basetype = type;
                     while (basetype != null)
                     {
-                        if (basetype.IsAssignableFrom(type))
+                        if (basetype.IsAssignableFrom(item.Key))
                         {
                             returnEx = Expression.Convert(Expression.Property(providedTypesParam, "Item", Expression.Constant(item.Key)), type);
                             break;
