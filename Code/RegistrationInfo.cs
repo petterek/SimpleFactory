@@ -3,13 +3,14 @@ using System.Reflection;
 
 namespace SimpleFactory.Contract
 {
-    public class RegistrationInfo : Contract.IRegistrationInfo
+    public class RegistrationInfo : IRegistrationInfo
     {
+        internal Type Key;
         internal Type Type;
-        //public Func<Dictionary<Type, Object>, object> Factory;
+        
         public bool Factory = false;
         internal MethodInfo FactoryInfo;
-        internal Object FactoryTarget;
+        internal object FactoryTarget;
         internal ConstructorInfo Constructor;
         internal ParameterInfo[] ConstructorParams;
         public void AsSingleton() { LifeCycle = LifeTimeEnum.Singleton; }
@@ -19,5 +20,11 @@ namespace SimpleFactory.Contract
         internal object Instance;
 
         public LifeTimeEnum LifeCycle { get;  set; }
+
+        public Type RegisteredWith => Key;
+
+        public Type ImplementedBy { get =>Type; set => Type = value;}
+
+        public bool IsImplementedByFactory => Factory;
     }
 }

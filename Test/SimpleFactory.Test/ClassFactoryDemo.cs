@@ -79,6 +79,7 @@ namespace SimpleFactory.Test
         {
             var container = new Container();
             container.Register<ClassThatNeedsClass3>();
+            container.Register<Class3>();
 
             ClassThatNeedsClass3 inst = null;
             Assert.Throws<Exceptions.MissingRegistrationException>(() => inst = container.CreateInstance<ClassThatNeedsClass3>());
@@ -105,6 +106,31 @@ namespace SimpleFactory.Test
             Assert.IsFalse(container.IsRegistered<IClass2>());
             Assert.IsTrue(container.IsRegistered<IClass1>());
         }
+
+
+        [Test] public void RegistrationInfoIsFilled()
+        {
+            var container = new Container();
+            var ri = container.Register<IClass1, Class1>();
+
+            Assert.AreEqual(typeof(IClass1),  ri.RegisteredWith);
+            Assert.AreEqual(typeof(Class1), ri.ImplementedBy);
+
+        }
+
+        [Test]
+        public void RegistrationInfoIsFilledForFactory()
+        {
+            var container = new Container();
+            var ri = container.Register<IClass1>(()=> new Class1());
+
+            Assert.AreEqual(typeof(IClass1), ri.RegisteredWith);
+            Assert.IsNull( ri.ImplementedBy);
+            Assert.IsTrue(ri.IsImplementedByFactory);
+
+        }
+
+
 
         public interface IClass1 { }
 

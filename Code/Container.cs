@@ -56,7 +56,7 @@ namespace SimpleFactory
                 throw new TooManyConstructorsException(instanceType);
             }
 
-            RegistrationInfo registrationInfo = new RegistrationInfo { Type = instanceType };
+            RegistrationInfo registrationInfo = new RegistrationInfo { Type = instanceType, Key = identifierType };
             registrationInfo.Constructor = constructor[0];
             registrationInfo.ConstructorParams = registrationInfo.Constructor.GetParameters();
 
@@ -87,31 +87,35 @@ namespace SimpleFactory
             Type identifierType = typeof(TInterface);
             Type instanceType = typeof(TImplementedBy);
             return Register(identifierType, instanceType);
+
+        }
+
+        private static RegistrationInfo CreateReginfo<TType>(MethodInfo mi, object target)
+        {
+            var registrationInfo = new RegistrationInfo
+            {
+                Key = typeof(TType),
+                //Type = typeof(TType),
+                Factory = true,
+                FactoryInfo = mi,
+                FactoryTarget = target
+            };
+            return registrationInfo;
         }
 
         public IRegistrationInfo Register<TType>(Func<TType> factory)
         {
-            var registrationInfo = new RegistrationInfo
-            {
-                Type = typeof(TType),
-                Factory = true,
-                FactoryInfo = factory.GetMethodInfo(),
-                FactoryTarget = factory.Target
-            };
+            RegistrationInfo registrationInfo = CreateReginfo<TType>(factory.Method, factory.Target);
             registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
         }
 
+        
+
         public IRegistrationInfo Register<TType, TParam1>(Func<TParam1, TType> factory)
         {
-            RegistrationInfo registrationInfo = new RegistrationInfo
-            {
-                Type = typeof(TType),
-                FactoryInfo = factory.GetMethodInfo(),
-                FactoryTarget = factory.Target,
-                Factory = true
-            };
+            RegistrationInfo registrationInfo = CreateReginfo<TType>(factory.Method, factory.Target);
             registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -119,13 +123,7 @@ namespace SimpleFactory
 
         public IRegistrationInfo Register<TType, TParam1, TParam2>(Func<TParam1, TParam2, TType> factory)
         {
-            RegistrationInfo registrationInfo = new RegistrationInfo
-            {
-                Type = typeof(TType),
-                FactoryInfo = factory.GetMethodInfo(),
-                FactoryTarget = factory.Target,
-                Factory = true
-            };
+            RegistrationInfo registrationInfo = CreateReginfo<TType>(factory.Method, factory.Target);
             registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -133,13 +131,7 @@ namespace SimpleFactory
 
         public IRegistrationInfo Register<TType, TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, TType> factory)
         {
-            RegistrationInfo registrationInfo = new RegistrationInfo
-            {
-                Type = typeof(TType),
-                FactoryInfo = factory.GetMethodInfo(),
-                FactoryTarget = factory.Target,
-                Factory = true
-            };
+            RegistrationInfo registrationInfo = CreateReginfo<TType>(factory.Method, factory.Target);
             registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -147,13 +139,7 @@ namespace SimpleFactory
 
         public IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4>(Func<TParam1, TParam2, TParam3, TParam4, TType> factory)
         {
-            RegistrationInfo registrationInfo = new RegistrationInfo
-            {
-                Type = typeof(TType),
-                FactoryInfo = factory.GetMethodInfo(),
-                FactoryTarget = factory.Target,
-                Factory = true
-            };
+            RegistrationInfo registrationInfo = CreateReginfo<TType>(factory.Method, factory.Target);
             registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -161,13 +147,7 @@ namespace SimpleFactory
 
         public IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TType> factory)
         {
-            RegistrationInfo registrationInfo = new RegistrationInfo
-            {
-                Type = typeof(TType),
-                FactoryInfo = factory.GetMethodInfo(),
-                FactoryTarget = factory.Target,
-                Factory = true
-            };
+            RegistrationInfo registrationInfo = CreateReginfo<TType>(factory.Method, factory.Target);
             registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -175,13 +155,7 @@ namespace SimpleFactory
 
         public IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TType> factory)
         {
-            RegistrationInfo registrationInfo = new RegistrationInfo
-            {
-                Type = typeof(TType),
-                FactoryInfo = factory.GetMethodInfo(),
-                FactoryTarget = factory.Target,
-                Factory = true
-            };
+            RegistrationInfo registrationInfo = CreateReginfo<TType>(factory.Method, factory.Target);
             registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
@@ -189,13 +163,7 @@ namespace SimpleFactory
 
         public IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TType> factory)
         {
-            RegistrationInfo registrationInfo = new RegistrationInfo
-            {
-                Type = typeof(TType),
-                FactoryInfo = factory.GetMethodInfo(),
-                FactoryTarget = factory.Target,
-                Factory = true
-            };
+            RegistrationInfo registrationInfo = CreateReginfo<TType>(factory.Method, factory.Target);
             registrationInfo.LifeCycle = defaultLifeTimeEnum;
             Registered[typeof(TType)] = registrationInfo;
             return registrationInfo;
