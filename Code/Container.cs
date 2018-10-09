@@ -44,6 +44,16 @@ namespace SimpleFactory
             return Register(t, t);
         }
 
+
+        public IRegistrationInfo Register(Type t, Func<object> factory)
+        {
+
+            RegistrationInfo registrationInfo = CreateReginfo(t, factory.Method, factory.Target);
+            registrationInfo.LifeCycle = defaultLifeTimeEnum;
+            Registered[t] = registrationInfo;
+            return registrationInfo;
+        }
+
         public IRegistrationInfo Register(Type identifierType, Type instanceType)
         {
             var constructor = instanceType.GetConstructors();
@@ -102,6 +112,18 @@ namespace SimpleFactory
             };
             return registrationInfo;
         }
+        private static RegistrationInfo CreateReginfo(Type forType, MethodInfo mi, object target)
+        {
+            var registrationInfo = new RegistrationInfo
+            {
+                Key = forType,
+                //Type = typeof(TType),
+                Factory = true,
+                FactoryInfo = mi,
+                FactoryTarget = target
+            };
+            return registrationInfo;
+        }
 
         public IRegistrationInfo Register<TType>(Func<TType> factory)
         {
@@ -111,7 +133,7 @@ namespace SimpleFactory
             return registrationInfo;
         }
 
-        
+
 
         public IRegistrationInfo Register<TType, TParam1>(Func<TParam1, TType> factory)
         {
@@ -252,7 +274,7 @@ namespace SimpleFactory
             else if (!Registered.ContainsKey(type)) //The requested type is not provided nor registered, we must loop trough the list of provided to see if we can find a super that match
             {
                 var basetype = type;
-                
+
                 while (basetype != null)
                 {
                     foreach (var item in providedTypes)
@@ -307,7 +329,7 @@ namespace SimpleFactory
                                 {
                                     paramList.Add(CreateBuilders(p.ParameterType, parameters, assign, list, providedTypesParam, providedTypes, false));
                                 }
-                                assign.Add(Expression.Assign(theVar, Expression.Call(target, registrationInfo.FactoryInfo, paramList)));
+                                assign.Add(Expression.Assign(theVar, Expression.Convert(Expression.Call(target, registrationInfo.FactoryInfo, paramList), theVar.Type)));
                             }
                             else
                             {
@@ -441,5 +463,6 @@ namespace SimpleFactory
                 fi.SetValue(loader, GetGenericMethod(fi.FieldType).Invoke(this, new object[] { providedInstances }));
             }
         }
+
     }
 }

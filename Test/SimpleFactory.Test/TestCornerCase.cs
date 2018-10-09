@@ -179,6 +179,21 @@ namespace SimpleFactory.Test
 
             Assert.IsInstanceOf<Dummy>(dummy);
         }
+
+        [Test]
+        public void PerGraphLifetimeWorksWithFactoryMethodAndTypeReg()
+        {
+            var c = new SimpleFactory.Container(LifeTimeEnum.PerGraph);
+
+            c.Register(typeof(Dep1), () => new Dep1());
+            c.Register<Dep2>();
+
+            var res = c.CreateInstance<Dep2>();
+
+            Assert.IsNotNull(res.dep1);
+        }
+
+
     }
 
     public class Dummy

@@ -21,6 +21,8 @@ namespace SimpleFactory.Contract
 
         IRegistrationInfo Register(Type t);
 
+        IRegistrationInfo Register(Type t, Func<Object> factory);
+
         IRegistrationInfo Register(Type identifierType, Type instanceType);
 
         IRegistrationInfo Register<TInterface, TImplementedBy>() where TImplementedBy : TInterface;
