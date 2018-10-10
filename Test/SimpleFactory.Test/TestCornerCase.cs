@@ -194,6 +194,19 @@ namespace SimpleFactory.Test
         }
 
 
+        [Test] public void ParameterFromFactoryDoesNotThrow()
+        {
+            var c = new SimpleFactory.Container(LifeTimeEnum.Transient);
+
+            c.Register(typeof(Dep1), () => new Dep1());
+            c.Register<Dummy>();
+
+
+            Assert.DoesNotThrow(() => c.CreateInstance<Dummy>());
+
+        }
+
+
     }
 
     public class Dummy
