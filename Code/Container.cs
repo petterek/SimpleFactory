@@ -449,28 +449,7 @@ namespace SimpleFactory
             return ret;
         }
 
-        private MethodInfo GetGenericMethod(Type t)
-        {
-            if (!GenericTypeCache.ContainsKey(t))
-            {
-                lock (GenericTypeCache)
-                {
-                    if (!GenericTypeCache.ContainsKey(t))
-                    {
-                        GenericTypeCache[t] = containerMi.MakeGenericMethod(t);
-                    }
-                }
-            }
-            return GenericTypeCache[t];
-        }
 
-        public void ResolveFields(object loader, params object[] providedInstances)
-        {
-            foreach (var fi in loader.GetType().GetFields())
-            {
-                fi.SetValue(loader, GetGenericMethod(fi.FieldType).Invoke(this, new object[] { providedInstances }));
-            }
-        }
 
     }
 }

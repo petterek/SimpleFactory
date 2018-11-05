@@ -47,6 +47,5 @@ namespace SimpleFactory.Contract
 
         IRegistrationInfo Register<TInterface, TParam1>(Func<TParam1, TInterface> factory);
 
-        void ResolveFields(object loader, params object[] providedInstances);
     }
 }
