@@ -2,8 +2,9 @@
 {
     public enum LifeTimeEnum
     {
-        Transient,
         Singleton,
-        PerGraph
+        Scoped,
+        Graph,
+        Transient,        
     }
 }

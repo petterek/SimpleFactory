@@ -9,7 +9,7 @@ namespace SimpleFactory.Test
         public void SingletonCreatedFromLambda()
         {
             var c = new Container();
-            c.Register<AdderWithId>(() => new AdderWithId(1337)).AsSingleton();
+            c.Register<AdderWithId>(() => new AdderWithId(1337)).Singleton();
 
             c.CreateInstance<AdderWithId>().Add();
             c.CreateInstance<AdderWithId>().Add();
@@ -34,8 +34,8 @@ namespace SimpleFactory.Test
         public void SingletonWithConstuctorParams()
         {
             var c = new Container();
-            c.Register<NumberProvider>().AsSingleton();
-            c.Register<AdderWithId, NumberProvider>((p) => new AdderWithId(p)).AsSingleton();
+            c.Register<NumberProvider>().Singleton();
+            c.Register<AdderWithId, NumberProvider>((p) => new AdderWithId(p)).Singleton();
 
             c.CreateInstance<AdderWithId>().Add();
             c.CreateInstance<AdderWithId>().Add();
@@ -50,7 +50,7 @@ namespace SimpleFactory.Test
         {
             var c = new Container();
             c.Register<NumberProvider>();
-            c.Register<AdderWithId, NumberProvider>((p) => new AdderWithId(p)).AsSingleton();
+            c.Register<AdderWithId, NumberProvider>((p) => new AdderWithId(p)).Singleton();
 
 
             Assert.Throws<Exceptions.UnAllowedConstruct>(() => c.CreateInstance<AdderWithId>());

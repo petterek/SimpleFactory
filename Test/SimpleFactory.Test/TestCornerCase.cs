@@ -6,6 +6,8 @@ using System.Linq;
 
 namespace SimpleFactory.Test
 {
+
+
     [TestFixture]
     public class TestCornerCase
     {
@@ -27,7 +29,7 @@ namespace SimpleFactory.Test
         public void RegisterSingletonIsWorking()
         {
             var c = new Container();
-            c.Register<Adder>().AsSingleton();
+            c.Register<Adder>().Singleton();
             c.CreateInstance<Adder>().Add();
             c.CreateInstance<Adder>().Add();
 
@@ -59,7 +61,7 @@ namespace SimpleFactory.Test
         {
             var c = new SimpleFactory.Container();
 
-            c.Register<Dep1>().PerGraph();
+            c.Register<Dep1>().Scoped();
             c.Register<Dep2>();
             c.Register<Dep3>();
             c.Register<Dep4>();
@@ -76,9 +78,9 @@ namespace SimpleFactory.Test
         {
             var c = new SimpleFactory.Container();
 
-            c.Register<Dep1>(() => new Dep1()).PerGraph();
-            c.Register<Dep2>().PerGraph();
-            c.Register<Dep3>().PerGraph();
+            c.Register<Dep1>(() => new Dep1()).Scoped();
+            c.Register<Dep2>().Scoped();
+            c.Register<Dep3>().Scoped();
             c.Register<Dep4>();
             c.Register<Dep5>();
 
@@ -93,7 +95,7 @@ namespace SimpleFactory.Test
         {
             var c = new SimpleFactory.Container();
 
-            c.Register<Dep1>().AsSingleton();
+            c.Register<Dep1>().Singleton();
             c.Register<Dep2>();
             c.Register<Dep3>();
             c.Register<Dep4>();
@@ -114,7 +116,7 @@ namespace SimpleFactory.Test
             var c = new SimpleFactory.Container();
 
             c.Register<Dep1>();
-            c.Register<Dep2>().PerGraph();
+            c.Register<Dep2>().Scoped();
             c.Register<Dep3>();
             c.Register<Dep4, Dep2, Dep3>((d2, d3) => new Dep4(d2));
             c.Register<Dep5>();
@@ -127,7 +129,7 @@ namespace SimpleFactory.Test
         [Test]
         public void SetDefaultLifeTime()
         {
-            var c = new SimpleFactory.Container(LifeTimeEnum.PerGraph);
+            var c = new SimpleFactory.Container(LifeTimeEnum.Scoped);
 
             c.Register<Dep1>();
             c.Register<Dep2>();
@@ -144,7 +146,7 @@ namespace SimpleFactory.Test
         [Test]
         public void PerGraphLifetimeWorksWithFactoryMethod()
         {
-            var c = new SimpleFactory.Container(LifeTimeEnum.PerGraph);
+            var c = new SimpleFactory.Container(LifeTimeEnum.Scoped);
 
             c.Register<Dep1>(() => new Dep1());
             c.Register<Dep2>();
@@ -183,7 +185,7 @@ namespace SimpleFactory.Test
         [Test]
         public void PerGraphLifetimeWorksWithFactoryMethodAndTypeReg()
         {
-            var c = new SimpleFactory.Container(LifeTimeEnum.PerGraph);
+            var c = new SimpleFactory.Container(LifeTimeEnum.Scoped);
 
             c.Register(typeof(Dep1), () => new Dep1());
             c.Register<Dep2>();
@@ -205,6 +207,8 @@ namespace SimpleFactory.Test
             Assert.DoesNotThrow(() => c.CreateInstance<Dummy>());
 
         }
+
+     
 
 
     }
@@ -230,6 +234,7 @@ namespace SimpleFactory.Test
 
     public class Dep1
     {
+        public int Value;
     }
 
     public class Dep2

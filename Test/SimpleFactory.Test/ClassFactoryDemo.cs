@@ -103,8 +103,8 @@ namespace SimpleFactory.Test
             var container = new Container();
             container.Register<IClass1, Class1>();
 
-            Assert.IsFalse(container.IsRegistered<IClass2>());
-            Assert.IsTrue(container.IsRegistered<IClass1>());
+            Assert.IsFalse(container.IsRegistered(typeof(IClass2)));
+            Assert.IsTrue(container.IsRegistered(typeof(IClass1)));
         }
 
 
