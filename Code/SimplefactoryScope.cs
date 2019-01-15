@@ -8,7 +8,7 @@ namespace SimpleFactory
        
     public class SimplefactoryProvider : IServiceProvider, IDisposable
     {
-        public SimplefactoryProvider(IServiceRegistry container)
+        public SimplefactoryProvider(Container container)
         {
             this.container = container;
         }
@@ -18,7 +18,7 @@ namespace SimpleFactory
 
         private Dictionary<Type, Object> ScopedObjects = new Dictionary<Type, object>();
 
-        readonly IServiceRegistry container;
+        readonly Container container;
 
         public object GetService(Type serviceType)
         {

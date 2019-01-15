@@ -11,7 +11,7 @@ namespace SimpleFactory.Test.Scope
         [Test]
         public void RegisterAndCreateTypeThroughInterface()
         {
-            IServiceRegistry c = new SimpleFactory.Container();
+            Container c = new SimpleFactory.Container();
 
             c.Register<ITestScope, ImplementTestScope>();
 
@@ -26,7 +26,7 @@ namespace SimpleFactory.Test.Scope
         [Test]
         public void RegisterAndCreateType()
         {
-            IServiceRegistry c = new SimpleFactory.Container();
+            Container c = new SimpleFactory.Container();
 
             c.Register<ImplementTestScope>();
 
@@ -43,7 +43,7 @@ namespace SimpleFactory.Test.Scope
         [Test]
         public void CheckScoped()
         {
-            IServiceRegistry c = new SimpleFactory.Container();
+            Container c = new SimpleFactory.Container();
 
             c.Register<ShouldBeScoped>().Scoped();
 
@@ -66,7 +66,7 @@ namespace SimpleFactory.Test.Scope
         [Test]
         public void CircularDependenciesThrowsException()
         {
-            IServiceRegistry c = new SimpleFactory.Container();
+            Container c = new SimpleFactory.Container();
 
             c.Register<CircularDependency>();
 
@@ -79,7 +79,7 @@ namespace SimpleFactory.Test.Scope
         [Test]
         public void RegisteringAndCreatingThroughFactoryWorks()
         {
-            IServiceRegistry c = new SimpleFactory.Container();
+            Container c = new SimpleFactory.Container();
 
             c.Register<Level1>(() => new Level1());
 
@@ -92,7 +92,7 @@ namespace SimpleFactory.Test.Scope
         [Test]
         public void FactoryWithParams()
         {
-            IServiceRegistry c = new SimpleFactory.Container();
+            Container c = new SimpleFactory.Container();
 
             c.Register<Level2>();
             c.Register<Level1,Level2>((lvl2) => new Level1());
@@ -107,7 +107,7 @@ namespace SimpleFactory.Test.Scope
         [Test]
         public void SingletonIsPreservedBetweenScopes()
         {
-            IServiceRegistry c = new SimpleFactory.Container();
+            Container c = new SimpleFactory.Container();
 
             c.Register<IAmSingleton>().Singleton();
             c.Register<Level1>();
@@ -128,7 +128,7 @@ namespace SimpleFactory.Test.Scope
         [Test]
         public void ScopeDemo()
         {
-            IServiceRegistry c = new SimpleFactory.Container();
+            Container c = new SimpleFactory.Container();
 
             
             c.Register<Level2>().Scoped();

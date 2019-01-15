@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace SimpleFactory
 {
-    public class Container : IContainer, IDisposable
+    public class Container :  IDisposable
     {
         private Dictionary<string, Func<Dictionary<Type, Object>, object>> creatorFunctions = new Dictionary<string, Func<Dictionary<Type, object>, object>>();
 

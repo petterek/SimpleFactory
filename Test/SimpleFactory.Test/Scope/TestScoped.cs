@@ -10,7 +10,7 @@ namespace SimpleFactory.Test.Scope
 
         [Test] public void UseRegistry ()
         {
-            IServiceRegistry registry = new SimpleFactory.Container();
+            Container registry = new SimpleFactory.Container();
 
             registry.Register<NeedsMyClass>();
             registry.Register<MyClass>();

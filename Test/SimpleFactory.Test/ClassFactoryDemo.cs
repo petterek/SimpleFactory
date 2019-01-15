@@ -62,7 +62,7 @@ namespace SimpleFactory.Test
         [Test]
         public void RegisteringTypeWithFactoryMethod()
         {
-            IContainer container = new Container();
+            Container container = new Container();
 
             container.Register<IClass2, Class2>();
             container.Register<Class1>(() => new Class1() { CheckThisValue = 10 });
