@@ -1,28 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 
+
 namespace SimpleFactory.Contract
 {
-    public interface IContainer
+    public interface IContainer : IServiceRegistry,IServiceProvider
     {
-        object CreateAnonymousInstance(Type toCreate);
-        object CreateAnonymousInstance(Type toCreate, params object[] providedTypes);
-        TToCreate CreateInstance<TToCreate>();
-        TToCreate CreateInstance<TToCreate>(Dictionary<Type, object> providedTypes);
-        TToCreate CreateInstance<TToCreate>(params object[] providedTypes);
-        IEnumerable<IRegistrationInfo> Items();
-        IRegistrationInfo Register(Type t);
-        IRegistrationInfo Register(Type identifierType, Type instanceType);
-        IRegistrationInfo Register<TInterface, TImplementedBy>() where TImplementedBy : TInterface;
-        IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TType> factory);
-        IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TType> factory);
-        IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4, TParam5>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TType> factory);
-        IRegistrationInfo Register<TType, TParam1, TParam2, TParam3, TParam4>(Func<TParam1, TParam2, TParam3, TParam4, TType> factory);
-        IRegistrationInfo Register<TType, TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, TType> factory);
-        IRegistrationInfo Register<TType, TParam1, TParam2>(Func<TParam1, TParam2, TType> factory);
-        IRegistrationInfo Register<TType, TParam1>(Func<TParam1, TType> factory);
-        IRegistrationInfo Register<TType>();
-        IRegistrationInfo Register<TType>(Func<TType> factory);
-        void ResolveFields(object loader, params object[] providedInstances);
+                        
+    }
+    
+    public interface IServiceRegistry
+    {
+        Dictionary<Type, RegistrationInfo> Registered { get; }
+        
+        bool IsRegistered(Type type);
+
+        RegistrationInfo Register(Type t);
+
+        RegistrationInfo Register(Type t, Func<Object> factory);
+
+        RegistrationInfo Register(Type identifierType, Type instanceType);
+
+        RegistrationInfo Register<TInterface, TImplementedBy>() where TImplementedBy : TInterface;
+
+        RegistrationInfo Register<TType>();
+
+        RegistrationInfo Register<TInterface>(Type implementedBy);
+
+        RegistrationInfo Register<TInterface>(Func<TInterface> factory);
+
+        RegistrationInfo Register<TInterface, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TParam7, TInterface> factory);
+
+        RegistrationInfo Register<TInterface, TParam1, TParam2, TParam3, TParam4, TParam5, TParam6>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6, TInterface> factory);
+
+        RegistrationInfo Register<TInterface, TParam1, TParam2, TParam3, TParam4, TParam5>(Func<TParam1, TParam2, TParam3, TParam4, TParam5, TInterface> factory);
+
+        RegistrationInfo Register<TInterface, TParam1, TParam2, TParam3, TParam4>(Func<TParam1, TParam2, TParam3, TParam4, TInterface> factory);
+
+        RegistrationInfo Register<TInterface, TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, TInterface> factory);
+
+        RegistrationInfo Register<TInterface, TParam1, TParam2>(Func<TParam1, TParam2, TInterface> factory);
+
+        RegistrationInfo Register<TInterface, TParam1>(Func<TParam1, TInterface> factory);
+
     }
 }

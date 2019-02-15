@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using SimpleFactory.Contract;
+using System;
 
 namespace SimpleFactory.Test
 {
@@ -28,6 +25,8 @@ namespace SimpleFactory.Test
                 () => container.CreateInstance<Class2>()
                 );
         }
+
+      
 
         [Test]
         public void InjectBasicWithRegistration()
@@ -63,7 +62,7 @@ namespace SimpleFactory.Test
         [Test]
         public void RegisteringTypeWithFactoryMethod()
         {
-            IContainer container = new Container();
+            Container container = new Container();
 
             container.Register<IClass2, Class2>();
             container.Register<Class1>(() => new Class1() { CheckThisValue = 10 });
@@ -80,13 +79,58 @@ namespace SimpleFactory.Test
         {
             var container = new Container();
             container.Register<ClassThatNeedsClass3>();
+            container.Register<Class3>();
 
             ClassThatNeedsClass3 inst = null;
             Assert.Throws<Exceptions.MissingRegistrationException>(() => inst = container.CreateInstance<ClassThatNeedsClass3>());
 
-            Assert.DoesNotThrow(() => inst = container.CreateInstance<ClassThatNeedsClass3>(
-                new Class3(new Class1(), new Class2(new Class1()))));
+            Assert.DoesNotThrow(() =>  container.CreateInstance<ClassThatNeedsClass3>(new Class3(new Class1(), new Class2(new Class1()))));
+            Assert.DoesNotThrow(() =>  container.CreateInstance<Class3>(new Class2(new Class1()), new Class1()));
         }
+
+        [Test]
+        public void RegestringNonCompatiableTypeThrowsException()
+        {
+            var container = new Container();
+
+            Assert.Throws<ArgumentException>(() => container.Register<IClass1>(typeof(object)));
+            Assert.DoesNotThrow(() => container.Register<object>(typeof(object)));
+        }
+
+        [Test]
+        public void IsRegiteredReturnsTrue()
+        {
+            var container = new Container();
+            container.Register<IClass1, Class1>();
+
+            Assert.IsFalse(container.IsRegistered(typeof(IClass2)));
+            Assert.IsTrue(container.IsRegistered(typeof(IClass1)));
+        }
+
+
+        [Test] public void RegistrationInfoIsFilled()
+        {
+            var container = new Container();
+            var ri = container.Register<IClass1, Class1>();
+
+            Assert.AreEqual(typeof(IClass1),  ri.RegisteredWith);
+            Assert.AreEqual(typeof(Class1), ri.ImplementedBy);
+
+        }
+
+        [Test]
+        public void RegistrationInfoIsFilledForFactory()
+        {
+            var container = new Container();
+            var ri = container.Register<IClass1>(()=> new Class1());
+
+            Assert.AreEqual(typeof(IClass1), ri.RegisteredWith);
+            Assert.IsNull( ri.ImplementedBy);
+            Assert.IsTrue(ri.IsImplementedByFactory);
+
+        }
+
+
 
         public interface IClass1 { }
 

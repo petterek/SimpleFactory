@@ -1,23 +1,57 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 
 namespace SimpleFactory.Contract
 {
-    public class RegistrationInfo : Contract.IRegistrationInfo
+    public class RegistrationInfo
     {
-        internal Type Type;
-        //public Func<Dictionary<Type, Object>, object> Factory;
-        public bool Factory = false;
-        internal MethodInfo FactoryInfo;
-        internal Object FactoryTarget;
-        internal ConstructorInfo Constructor;
-        internal ParameterInfo[] ConstructorParams;
-        public void AsSingleton() { LifeCycle = LifeTimeEnum.Singleton; }
-        public void PerGraph() { LifeCycle = LifeTimeEnum.PerGraph; }
+        public Type Key { get; set; }
+        public Type Type { get; set; }
+
+
+        public FactoryData  Factory { get; set; }
+        public ConstructorData Constructor { get; set; }
+
+        public void Singleton() { LifeCycle = LifeTimeEnum.Singleton; }
         public void Transient() { LifeCycle = LifeTimeEnum.Transient; }
+        public void Scoped() { LifeCycle = LifeTimeEnum.Scoped; }
 
-        internal object Instance;
 
-        public LifeTimeEnum LifeCycle { get;  set; }
+        public object SingletonInstance { get; set; }
+
+        public LifeTimeEnum LifeCycle { get; set; }
+
+        public Type RegisteredWith => Key;
+
+        public Type ImplementedBy { get => Type; set => Type = value; }
+
+        public bool IsImplementedByFactory => Factory != null;
+    }
+
+    public class FactoryData
+    {
+        public FactoryData(MethodInfo method, object target)
+        {
+            Method = method;
+            Target = target;
+            Parameters = method.GetParameters().Select(p=>p.ParameterType).ToArray();
+        }
+
+        public Type[] Parameters { get; }
+        public MethodInfo Method { get; }
+        public object Target { get; }
+
+    }
+
+    public class ConstructorData
+    {
+        public ConstructorData(ConstructorInfo data)
+        {
+            Method = data;
+            Params = Method.GetParameters().Select(p=>p.ParameterType).ToArray() ;
+        }
+        public ConstructorInfo Method { get; }
+        public Type[] Params { get; }
     }
 }

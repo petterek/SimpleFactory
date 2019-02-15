@@ -71,17 +71,7 @@ namespace SimpleFactory.Test
             Assert.IsInstanceOf<SimpleOne>(test);
         }
 
-        [Test]
-        public void ReolveFieldsTest()
-        {
-            var container = new Container();
-            container.Register<ISimpleInterface, SimpleOne>();
-            var toFill = new ClassWithFields();
-
-            Assert.DoesNotThrow(() => container.ResolveFields(toFill, 3, new Object(), new SimpleOne()));
-            Assert.IsInstanceOf<SimpleOne>(toFill.Simple);
-        }
-
+        
         [Test]
         public void GetInjectionWhenSuperTypeIsRegisterd()
         {
